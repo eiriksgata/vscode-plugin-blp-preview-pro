@@ -17,6 +17,22 @@ import { contentCopy } from '../../common/clipboard';
 
 export const tarnsPath = originPath => isWin ? originPath.slice(1) : originPath;
 
+function resolveArchiveUri(uri?: Uri) {
+    const target = uri ?? vscode.window.activeTextEditor?.document?.uri;
+    if (!target) {
+        vscode.window.showErrorMessage('No archive file selected.');
+        return null;
+    }
+
+    const ext = path.extname(target.fsPath).toLowerCase();
+    if (!['.w3x', '.w3m', '.mpq'].includes(ext)) {
+        vscode.window.showErrorMessage('Please select a .w3x, .w3m, or .mpq file first.');
+        return null;
+    }
+
+    return target;
+}
+
 function helperNodeToMpqItemNodes(node: MpqTreeHelperNode) {
     return node.children.sort((a, b) => {
         if (a.isLeaf() && !b.isLeaf()) {
@@ -50,8 +66,12 @@ export class W3XTreeProvider implements vscode.TreeDataProvider<MpqItemNode | W3
     }
 
     registerCommands(ctx: BlpPreviewContext) {
-        commandMap.set('blpPreview.exploreW3XFile', (uri: Uri) => {
-            this.openW3X(uri);
+        commandMap.set('blpPreview.exploreW3XFile', (uri?: Uri) => {
+            const target = resolveArchiveUri(uri);
+            if (!target) {
+                return;
+            }
+            this.openW3X(target);
         });
         commandMap.set('blpPreview.w3xExplorerClear', (uri: Uri) => {
             this.clear();
@@ -135,7 +155,11 @@ export class W3XTreeProvider implements vscode.TreeDataProvider<MpqItemNode | W3
                 }
             });
         });
-        commandMap.set('blpPreview.extractAll', (uri: Uri) => {
+        commandMap.set('blpPreview.extractAll', (uri?: Uri) => {
+            const target = resolveArchiveUri(uri);
+            if (!target) {
+                return;
+            }
             vscode.window.showOpenDialog({
                 canSelectMany: false,
                 openLabel: localize('blpPreview.saveBlpFolder', 'Select'),
@@ -147,7 +171,7 @@ export class W3XTreeProvider implements vscode.TreeDataProvider<MpqItemNode | W3
                         location: vscode.ProgressLocation.Window,
                         title: 'extracting files to ' + folders[0].fsPath
                     }, () => {
-                        return War3Map.getByPath(uri.fsPath).extractTo(folders[0].fsPath).then(() => {
+                        return War3Map.getByPath(target.fsPath).extractTo(folders[0].fsPath).then(() => {
                             vscode.window.showInformationMessage('Extraction done!');
                         }, err => {
                             vscode.window.showErrorMessage(err.toString());

@@ -13,15 +13,26 @@ export default class ArchiveManager {
             await this.task;
             return;
         }
+        this.task = new Task<boolean>();
         this.isLoading = true;
-        const root = path.dirname(mpqFilePath);
-        const files = await FsPromise.readDir(root);
-        this.archives = await Promise.all(files.filter(v => v.endsWith('.mpq')).map(async file => {
-            const archive = new MpqArchive(path.basename(file));
-            await archive.load(path.resolve(root, file));
-            return archive;
-        }));
-        this.task.resolve(true);
+        try {
+            const stat = await FsPromise.stat(mpqFilePath);
+            const root = stat.isDirectory() ? mpqFilePath : path.dirname(mpqFilePath);
+            const files = await FsPromise.readDir(root);
+            const mpqFiles = files.filter(v => v.toLowerCase().endsWith('.mpq'));
+            this.archives = await Promise.all(mpqFiles.map(async file => {
+                const archive = new MpqArchive(path.basename(file));
+                await archive.load(path.resolve(root, file));
+                return archive;
+            }));
+            this.task.resolve(true);
+        } catch (e) {
+            this.archives = [];
+            this.task.reject(e);
+            throw e;
+        } finally {
+            this.isLoading = false;
+        }
     }
 
     async get(name: string) {

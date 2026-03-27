@@ -1,9 +1,9 @@
 {
-	"name": "blp-preview",
-	"displayName": "blp-preview",
+	"name": "blp-preview-pro",
+	"displayName": "blp-preview-pro",
 	"description": "blp1 image preview, tag image preview, mdx model preview",
-	"version": "0.3.4",
-	"publisher": "hugehardzhang",
+	"version": "1.0.0",
+	"publisher": "localwar3dev",
 	"icon": "icon.png",
 	"engines": {
 		"vscode": "^1.58.0"
@@ -20,6 +20,11 @@
 		"onCustomEditor:blpPreview.previewEditor.forMpq",
 		"onView:blpPreview.mpqExplorer",
 		"onView:blpPreview.w3xExplorer",
+		"onCommand:blpPreview.selectMpqLocation",
+		"onCommand:blpPreview.reloadMpqArchives",
+		"onCommand:blpPreview.showMpqStatus",
+		"onCommand:blpPreview.openMpq",
+		"onCommand:blpPreview.openW3X",
 		"onCommand:blpPreview.exploreW3XFile",
 		"onCommand:blpPreview.extractAll",
 		"onCommand:blpPreview.convert2png",
@@ -78,6 +83,31 @@
 			}
 		],
 		"commands": [
+			{
+				"command": "blpPreview.selectMpqLocation",
+				"title": "Select Warcraft MPQ Path",
+				"category": "Blp Preview"
+			},
+			{
+				"command": "blpPreview.reloadMpqArchives",
+				"title": "Reload MPQ Archives",
+				"category": "Blp Preview"
+			},
+			{
+				"command": "blpPreview.showMpqStatus",
+				"title": "Show MPQ Status",
+				"category": "Blp Preview"
+			},
+			{
+				"command": "blpPreview.openMpq",
+				"title": "Open MPQ Resource",
+				"category": "Blp Preview"
+			},
+			{
+				"command": "blpPreview.openW3X",
+				"title": "Open W3X Resource",
+				"category": "Blp Preview"
+			},
 			{
 				"command": "blpPreview.extractAll",
 				"title": "%blpPreview.extractAll%",
@@ -146,6 +176,18 @@
 		],
 		"menus": {
 			"view/title": [
+				{
+					"command": "blpPreview.selectMpqLocation",
+					"when": "view == blpPreview.mpqExplorer"
+				},
+				{
+					"command": "blpPreview.reloadMpqArchives",
+					"when": "view == blpPreview.mpqExplorer"
+				},
+				{
+					"command": "blpPreview.showMpqStatus",
+					"when": "view == blpPreview.mpqExplorer"
+				},
 				{
 					"command": "blpPreview.w3xExplorerClear",
 					"when": "view == blpPreview.w3xExplorer"

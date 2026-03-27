@@ -4,6 +4,15 @@ import type MpqTreeHelperNode from './mpq-tree-helper-node';
 import { MpqNode } from './mpq-node';
 import { MpqItemNode } from './mpq-item-node';
 
+class MpqActionItem extends vscode.TreeItem {
+    constructor(label: string, command: vscode.Command, description?: string) {
+        super(label, vscode.TreeItemCollapsibleState.None);
+        this.command = command;
+        this.description = description;
+        this.contextValue = 'action';
+    }
+}
+
 function helperNodeToMpqItemNodes(node: MpqTreeHelperNode) {
     return node.children.sort((a, b) => {
         if (a.isLeaf() && !b.isLeaf()) {
@@ -18,26 +27,42 @@ function helperNodeToMpqItemNodes(node: MpqTreeHelperNode) {
     });
 }
 
-export class MpqTreeProvider implements vscode.TreeDataProvider<MpqItemNode | MpqNode>, vscode.TextDocumentContentProvider {
-    private _onDidChangeTreeData: vscode.EventEmitter<MpqItemNode | MpqNode | undefined | void> = new vscode.EventEmitter<MpqItemNode | MpqNode | undefined | void>();
-    readonly onDidChangeTreeData: vscode.Event<MpqItemNode | MpqNode | undefined | void> = this._onDidChangeTreeData.event;
+export class MpqTreeProvider implements vscode.TreeDataProvider<vscode.TreeItem>, vscode.TextDocumentContentProvider {
+    private _onDidChangeTreeData: vscode.EventEmitter<vscode.TreeItem | undefined | void> = new vscode.EventEmitter<vscode.TreeItem | undefined | void>();
+    readonly onDidChangeTreeData: vscode.Event<vscode.TreeItem | undefined | void> = this._onDidChangeTreeData.event;
 
     constructor(private mpqManager: ArchiveManager) {
     }
 
+    refresh() {
+        this._onDidChangeTreeData.fire();
+    }
+
     onDidChange?: vscode.Event<vscode.Uri>;
 
-    getTreeItem(element: MpqItemNode | MpqNode): vscode.TreeItem | Thenable<vscode.TreeItem> {
+    getTreeItem(element: vscode.TreeItem): vscode.TreeItem | Thenable<vscode.TreeItem> {
         return element;
     }
 
-    async getChildren(element?: MpqItemNode | MpqNode): Promise<Array<MpqNode | MpqItemNode>> {
+    async getChildren(element?: vscode.TreeItem): Promise<vscode.TreeItem[]> {
         if (!this.mpqManager) {
             vscode.window.showInformationMessage('mpq location is not a mpq file!');
             return Promise.resolve([]);
         }
         if (!element) {
-            await this.mpqManager.task;
+            await this.mpqManager.task.catch(() => undefined);
+            if (this.mpqManager.archives.length === 0) {
+                return [
+                    new MpqActionItem('Select Warcraft MPQ Path...', {
+                        title: 'Select Warcraft MPQ Path',
+                        command: 'blpPreview.selectMpqLocation',
+                    }),
+                    new MpqActionItem('Show MPQ Status', {
+                        title: 'Show MPQ Status',
+                        command: 'blpPreview.showMpqStatus',
+                    }, 'No MPQ archives loaded'),
+                ];
+            }
             return this.mpqManager.archives.map(v => {
                 return new MpqNode(v.name, v, vscode.TreeItemCollapsibleState.Collapsed);
             });

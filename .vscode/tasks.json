@@ -4,6 +4,19 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
+			"label": "build: webpack compile",
+			"type": "npm",
+			"script": "compile",
+			"problemMatcher": [
+				"$ts-webpack"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		},
+		{
+			"label": "build: webpack watch",
 			"type": "npm",
 			"script": "watch",
 			"problemMatcher": [
@@ -14,12 +27,10 @@
 			"presentation": {
 				"reveal": "never"
 			},
-			"group": {
-				"kind": "build",
-				"isDefault": true
-			}
+			"group": "build"
 		},
 		{
+			"label": "build: test watch",
 			"type": "npm",
 			"script": "test-watch",
 			"problemMatcher": "$tsc-watch",

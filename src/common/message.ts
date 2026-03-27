@@ -6,6 +6,7 @@ import * as http from "https";
 import ArchiveManager from '../mpq-manager/manager';
 import { BlpPreviewContext } from '../extension';
 import MpqArchive from '../mpq-manager/archive';
+import MpqManager from '../mpq-manager';
 
 function request(url: string): Promise<{ buf: Buffer, ext: string }> {
     return new Promise((resolve) => {
@@ -53,6 +54,13 @@ export default class Message {
         this.maxDeep = this.resourceRoot.path.split('/').length - 1;
     }
 
+    private async waitForMpqReady() {
+        await MpqManager.waitUntilReady();
+        if (this.mpqManager?.task) {
+            await this.mpqManager.task.catch(() => undefined);
+        }
+    }
+
     async load() {
         if (this.resource.scheme === 'w3x') {
             const [fsPath, resourcePath] = this.resource.fsPath.split(/\.w3x/);
@@ -90,6 +98,7 @@ export default class Message {
             const data = await mpq.get(path);
             if (!data) {
                 if (this.mpqManager) {
+                    await this.waitForMpqReady();
                     const buf = await this.mpqManager.get(path.replace(/\//g, '\\'));
                     if (buf) {
                         return new Uint8Array(buf).buffer;
@@ -105,6 +114,7 @@ export default class Message {
         }, async () => {
             if (deep === -1) {
                 if (this.mpqManager) {
+                    await this.waitForMpqReady();
                     const buf = await this.mpqManager.get(path.replace(/\//g, '\\'));
                     if (buf) {
                         return new Uint8Array(buf).buffer;
@@ -115,9 +125,9 @@ export default class Message {
                 return await this._loadSource('../' + path, deep === -1 ? this.maxDeep : deep - 1);
             } else if (deep === 0) {
                 console.info("request", `https://www.hiveworkshop.com/casc-contents?path=${encodeURIComponent(path)}`);
-                const { buf } = await request(`https://www.hiveworkshop.com/casc-contents?path=${encodeURIComponent(path)}`);
-                if (buf) {
-                    return new Uint8Array(buf).buffer;
+                const remote = await request(`https://www.hiveworkshop.com/casc-contents?path=${encodeURIComponent(path)}`);
+                if (remote?.buf) {
+                    return new Uint8Array(remote.buf).buffer;
                 }
             }
         });
@@ -131,6 +141,7 @@ export default class Message {
         }, async () => {
             if (deep === -1) {
                 if (this.mpqManager) {
+                    await this.waitForMpqReady();
                     const buf = await this.mpqManager.getAll(path.replace(/\//g, '\\'));
                     if (buf.length > 0) {
                         return buf.map(v => new Uint8Array(v).buffer);
@@ -141,9 +152,9 @@ export default class Message {
                 return await this._loadSourceArray('../' + path, deep === -1 ? this.maxDeep : deep - 1);
             } else if (deep === 0) {
                 console.info("request", `https://www.hiveworkshop.com/casc-contents?path=${encodeURIComponent(path)}`);
-                const { buf } = await request(`https://www.hiveworkshop.com/casc-contents?path=${encodeURIComponent(path)}`);
-                if (buf) {
-                    return [new Uint8Array(buf).buffer];
+                const remote = await request(`https://www.hiveworkshop.com/casc-contents?path=${encodeURIComponent(path)}`);
+                if (remote?.buf) {
+                    return [new Uint8Array(remote.buf).buffer];
                 }
             }
         });

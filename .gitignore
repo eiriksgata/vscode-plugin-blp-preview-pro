@@ -7,3 +7,5 @@ node_modules
 media/*.map
 media/*.css
 media/*.js
+
+model

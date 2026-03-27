@@ -1,4 +1,4 @@
-# Blp Preview
+# blp-preview-pro
 
 ## Features
 
