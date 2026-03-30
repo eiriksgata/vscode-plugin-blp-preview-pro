@@ -2,8 +2,9 @@
 	"name": "blp-preview-pro",
 	"displayName": "blp-preview-pro",
 	"description": "A VSCode extension for previewing Warcraft III resources, with support for MPQ archives and W3X maps.",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"publisher": "eiriksgata",
+	"license": "MIT",
 	"icon": "icon.png",
 	"engines": {
 		"vscode": "^1.58.0"
