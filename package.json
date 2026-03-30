@@ -10,7 +10,7 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/ilimei/vscode-plugin-blp-preview.git"
+		"url": "https://github.com/eiriksgata/vscode-plugin-blp-preview-pro.git"
 	},
 	"categories": [
 		"Other"
