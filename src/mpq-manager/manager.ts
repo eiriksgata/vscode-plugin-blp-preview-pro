@@ -5,15 +5,20 @@ import * as path from "path";
 
 export default class ArchiveManager {
     archives: MpqArchive[] = [];
-    task: Task<boolean> = new Task();
+    task: Task<boolean>;
     isLoading = false;
+
+    constructor() {
+        this.task = new Task();
+        this.task.resolve(false);
+    }
 
     async load(mpqFilePath: string) {
         if (this.isLoading) {
             await this.task;
             return;
         }
-        this.task = new Task<boolean>();
+        this.task = new Task<boolean>()
         this.isLoading = true;
         try {
             const stat = await FsPromise.stat(mpqFilePath);
