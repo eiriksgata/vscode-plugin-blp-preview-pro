@@ -5,7 +5,7 @@ import type BasePreview from './BasePreview';
 import SlkPreview from './slkPreview/SlkPreview';
 
 export default class EditableEditorProvider implements vscode.CustomEditorProvider {
-	public static readonly viewType = 'blpPreview.editableEditor';
+	public static readonly viewType = 'blpPreviewPro.editableEditor';
 	private readonly _previews = new Set<BasePreview>();
 	private _activePreview: BasePreview | undefined;
 
@@ -66,6 +66,6 @@ export default class EditableEditorProvider implements vscode.CustomEditorProvid
 	}
 
 	private setPreviewActiveContext(value: boolean) {
-		vscode.commands.executeCommand('setContext', 'blpPreviewFocus', value);
+		vscode.commands.executeCommand('setContext', 'blpPreviewProFocus', value);
 	}
 }

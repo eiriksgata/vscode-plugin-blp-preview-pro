@@ -14,7 +14,7 @@ function resolveUri(uri?: vscode.Uri) {
     return target;
 }
 
-commandMap.set('blpPreview.openMpq', async function (uri: vscode.Uri, selectURI: vscode.Uri[]) {
+commandMap.set('blpPreviewPro.openMpq', async function (uri: vscode.Uri, selectURI: vscode.Uri[]) {
     const target = resolveUri(uri);
     if (!target) {
         return;
@@ -28,7 +28,7 @@ commandMap.set('blpPreview.openMpq', async function (uri: vscode.Uri, selectURI:
     }
 });
 
-commandMap.set('blpPreview.openW3X', (uri?: vscode.Uri) => {
+commandMap.set('blpPreviewPro.openW3X', (uri?: vscode.Uri) => {
     const target = resolveUri(uri);
     if (!target) {
         return;

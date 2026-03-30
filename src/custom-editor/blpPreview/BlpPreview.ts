@@ -9,7 +9,7 @@ export default class BlpPreview extends BasePreview {
 
     getCssSource(): string[] {
         return [
-            '/media/blpPreview.css',
+            '/media/blpPreviewPro.css',
         ];
     }
 
@@ -20,7 +20,7 @@ export default class BlpPreview extends BasePreview {
             '/media/lib/binReader.js',
             '/media/lib/tga.js',
             '/media/message.js',
-            '/media/blpPreview.js',
+            '/media/blpPreviewPro.js',
         ];
     }
 

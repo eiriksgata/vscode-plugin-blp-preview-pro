@@ -8,7 +8,7 @@ import { W3XTreeProvider } from './w3x/w3x-tree-data-provider';
 export function registerTreeProvider(context: vscode.ExtensionContext, ctx: BlpPreviewContext) {
     const mpqProvider = new MpqTreeProvider(MpqManager.instance);
 
-    commandMap.set('blpPreview.selectMpqLocation', async () => {
+    commandMap.set('blpPreviewPro.selectMpqLocation', async () => {
         const selected = await vscode.window.showOpenDialog({
             canSelectFiles: true,
             canSelectFolders: true,
@@ -32,19 +32,19 @@ export function registerTreeProvider(context: vscode.ExtensionContext, ctx: BlpP
         }
     });
 
-    commandMap.set('blpPreview.reloadMpqArchives', async () => {
-        const loaded = await MpqManager.reload(vscode.workspace.getConfiguration('blpPreview').get<string>('mpqLocation'));
+    commandMap.set('blpPreviewPro.reloadMpqArchives', async () => {
+        const loaded = await MpqManager.reload(vscode.workspace.getConfiguration('blpPreviewPro').get<string>('mpqLocation'));
         mpqProvider.refresh();
         if (loaded) {
             vscode.window.showInformationMessage(`Loaded MPQ archives: ${MpqManager.archiveNames.join(', ')}`);
         } else {
-            vscode.window.showWarningMessage('No MPQ archives detected. Check blpPreview.mpqLocation.');
+            vscode.window.showWarningMessage('No MPQ archives detected. Check blpPreviewPro.mpqLocation.');
         }
     });
 
-    commandMap.set('blpPreview.showMpqStatus', async () => {
+    commandMap.set('blpPreviewPro.showMpqStatus', async () => {
         await MpqManager.waitUntilReady();
-        const configured = vscode.workspace.getConfiguration('blpPreview').get<string>('mpqLocation') || '(not set)';
+        const configured = vscode.workspace.getConfiguration('blpPreviewPro').get<string>('mpqLocation') || '(not set)';
         const archives = MpqManager.archiveNames;
         const message = archives.length > 0
             ? `mpqLocation: ${configured}\nLoaded archives: ${archives.join(', ')}`
@@ -52,11 +52,11 @@ export function registerTreeProvider(context: vscode.ExtensionContext, ctx: BlpP
         vscode.window.showInformationMessage(message);
     });
 
-    context.subscriptions.push(vscode.window.registerTreeDataProvider('blpPreview.mpqExplorer', mpqProvider));
+    context.subscriptions.push(vscode.window.registerTreeDataProvider('blpPreviewPro.mpqExplorer', mpqProvider));
     context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider('mpq', mpqProvider));
 
     const treeProvider = new W3XTreeProvider(ctx);
     ctx.w3xTreeProvider = treeProvider;
-    context.subscriptions.push(vscode.window.registerTreeDataProvider('blpPreview.w3xExplorer', treeProvider));
+    context.subscriptions.push(vscode.window.registerTreeDataProvider('blpPreviewPro.w3xExplorer', treeProvider));
     context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider('w3x', treeProvider));
 }

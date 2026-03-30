@@ -100,7 +100,7 @@ export default class MpqManager {
     }
 
     public static async updateLocation(location: string) {
-        const config = vscode.workspace.getConfiguration('blpPreview');
+        const config = vscode.workspace.getConfiguration('blpPreviewPro');
         await config.update('mpqLocation', location, vscode.ConfigurationTarget.Global);
         return this.reload(location);
     }
@@ -108,7 +108,7 @@ export default class MpqManager {
     private static create() {
         this._mpqManager = new ArchiveManager();
         this._ready = (async () => {
-            const data = vscode.workspace.getConfiguration("blpPreview");
+            const data = vscode.workspace.getConfiguration("blpPreviewPro");
             const configured = data?.get<string>('mpqLocation')?.trim();
 
             const loaded = await this.initialize(configured);

@@ -4,14 +4,14 @@ import { localize } from '../localize';
 import commandMap from "./helper/commands";
 import { mdl2mdx } from './helper/mdl2mdx';
 
-commandMap.set('blpPreview.convert2mdx', async function (uri: vscode.Uri, selectURI: vscode.Uri[]) {
+commandMap.set('blpPreviewPro.convert2mdx', async function (uri: vscode.Uri, selectURI: vscode.Uri[]) {
     const data = vscode.workspace.getConfiguration("convert2mdx");
     const shouldReplaceExt = data && data.convert2mdx ? data.convert2mdx : false;
 
     if (selectURI.length > 1) {
         vscode.window.showOpenDialog({
             canSelectMany: false,
-            openLabel: localize('blpPreview.saveBlpFolder', 'Select'),
+            openLabel: localize('blpPreviewPro.saveBlpFolder', 'Select'),
             canSelectFiles: false,
             canSelectFolders: true,
         }).then(folders => {
@@ -24,7 +24,7 @@ commandMap.set('blpPreview.convert2mdx', async function (uri: vscode.Uri, select
                     this.edit.createFile(distPath, { ignoreIfExists: true });
                     mdl2mdx(uri.fsPath, distPath.fsPath);
                 }
-                return vscode.window.showInformationMessage(localize("blpPreview.convertSuccess", "convert success"));
+                return vscode.window.showInformationMessage(localize("blpPreviewPro.convertSuccess", "convert success"));
             }
         });
     } else {
@@ -32,7 +32,7 @@ commandMap.set('blpPreview.convert2mdx', async function (uri: vscode.Uri, select
             const distPath = uri.with({ path: shouldReplaceExt ? uri.path.replace(/\.(mdl)$/i, '.mdx') : uri.path + '.mdx' });
             this.edit.createFile(distPath, { ignoreIfExists: true });
             mdl2mdx(uri.fsPath, distPath.fsPath);
-            await vscode.window.showInformationMessage(localize("blpPreview.convertSuccess", "convert success"));
+            await vscode.window.showInformationMessage(localize("blpPreviewPro.convertSuccess", "convert success"));
         } catch (e) {
             console.error(e);
         }

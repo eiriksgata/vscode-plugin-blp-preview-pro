@@ -19,7 +19,7 @@ export class MpqItemNode extends vscode.TreeItem {
             }
             this.command = command || {
                 title: 'Open with mpq',
-                command: 'blpPreview.openMpq',
+                command: 'blpPreviewPro.openMpq',
                 arguments: [this.resourceUri],
             };
         }

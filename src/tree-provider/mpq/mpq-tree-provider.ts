@@ -55,11 +55,11 @@ export class MpqTreeProvider implements vscode.TreeDataProvider<vscode.TreeItem>
                 return [
                     new MpqActionItem('Select Warcraft MPQ Path...', {
                         title: 'Select Warcraft MPQ Path',
-                        command: 'blpPreview.selectMpqLocation',
+                        command: 'blpPreviewPro.selectMpqLocation',
                     }),
                     new MpqActionItem('Show MPQ Status', {
                         title: 'Show MPQ Status',
-                        command: 'blpPreview.showMpqStatus',
+                        command: 'blpPreviewPro.showMpqStatus',
                     }, 'No MPQ archives loaded'),
                 ];
             }

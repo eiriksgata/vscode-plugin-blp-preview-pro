@@ -1,9 +1,9 @@
 {
 	"name": "blp-preview-pro",
 	"displayName": "blp-preview-pro",
-	"description": "blp1 image preview, tag image preview, mdx model preview",
+	"description": "A VSCode extension for previewing Warcraft III resources, with support for MPQ archives and W3X maps.",
 	"version": "1.0.0",
-	"publisher": "localwar3dev",
+	"publisher": "eiriksgata",
 	"icon": "icon.png",
 	"engines": {
 		"vscode": "^1.58.0"
@@ -16,30 +16,30 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCustomEditor:blpPreview.previewEditor",
-		"onCustomEditor:blpPreview.previewEditor.forMpq",
-		"onView:blpPreview.mpqExplorer",
-		"onView:blpPreview.w3xExplorer",
-		"onCommand:blpPreview.selectMpqLocation",
-		"onCommand:blpPreview.reloadMpqArchives",
-		"onCommand:blpPreview.showMpqStatus",
-		"onCommand:blpPreview.openMpq",
-		"onCommand:blpPreview.openW3X",
-		"onCommand:blpPreview.exploreW3XFile",
-		"onCommand:blpPreview.extractAll",
-		"onCommand:blpPreview.convert2png",
-		"onCommand:blpPreview.convert2jpg",
-		"onCommand:blpPreview.convert2blp",
-		"onCommand:blpPreview.convert2mdl",
-		"onCommand:blpPreview.convert2mdx"
+		"onCustomEditor:blpPreviewPro.previewEditor",
+		"onCustomEditor:blpPreviewPro.previewEditor.forMpq",
+		"onView:blpPreviewPro.mpqExplorer",
+		"onView:blpPreviewPro.w3xExplorer",
+		"onCommand:blpPreviewPro.selectMpqLocation",
+		"onCommand:blpPreviewPro.reloadMpqArchives",
+		"onCommand:blpPreviewPro.showMpqStatus",
+		"onCommand:blpPreviewPro.openMpq",
+		"onCommand:blpPreviewPro.openW3X",
+		"onCommand:blpPreviewPro.exploreW3XFile",
+		"onCommand:blpPreviewPro.extractAll",
+		"onCommand:blpPreviewPro.convert2png",
+		"onCommand:blpPreviewPro.convert2jpg",
+		"onCommand:blpPreviewPro.convert2blp",
+		"onCommand:blpPreviewPro.convert2mdl",
+		"onCommand:blpPreviewPro.convert2mdx"
 	],
 	"main": "./dist/extension.js",
 	"contributes": {
 		"viewsContainers": {
 			"activitybar": [
 				{
-					"id": "blpPreviewMpqExplorer",
-					"title": "mpq Explorer",
+					"id": "blpPreviewProMpqExplorer",
+					"title": "MPQ Explorer",
 					"icon": "media/resource/mpq.svg"
 				}
 			]
@@ -47,22 +47,22 @@
 		"views": {
 			"explorer": [
 				{
-					"id": "blpPreview.w3xExplorer",
-					"name": "w3x Explorer"
+					"id": "blpPreviewPro.w3xExplorer",
+					"name": "W3X Explorer"
 				}
 			],
-			"blpPreviewMpqExplorer": [
+			"blpPreviewProMpqExplorer": [
 				{
-					"id": "blpPreview.mpqExplorer",
-					"name": "mpq Explorer",
+					"id": "blpPreviewPro.mpqExplorer",
+					"name": "MPQ Explorer",
 					"icon": "media/resource/mpq.svg",
-					"contextualTitle": "blpPreview"
+					"contextualTitle": "blpPreviewPro"
 				}
 			]
 		},
 		"customEditors": [
 			{
-				"viewType": "blpPreview.previewEditor",
+				"viewType": "blpPreviewPro.previewEditor",
 				"displayName": "blp-preview",
 				"priority": "default",
 				"selector": [
@@ -72,7 +72,7 @@
 				]
 			},
 			{
-				"viewType": "blpPreview.previewEditor.forMpq",
+				"viewType": "blpPreviewPro.previewEditor.forMpq",
 				"displayName": "blp-preview for mqp",
 				"priority": "option",
 				"selector": [
@@ -84,220 +84,220 @@
 		],
 		"commands": [
 			{
-				"command": "blpPreview.selectMpqLocation",
+				"command": "blpPreviewPro.selectMpqLocation",
 				"title": "Select Warcraft MPQ Path",
 				"category": "Blp Preview"
 			},
 			{
-				"command": "blpPreview.reloadMpqArchives",
+				"command": "blpPreviewPro.reloadMpqArchives",
 				"title": "Reload MPQ Archives",
 				"category": "Blp Preview"
 			},
 			{
-				"command": "blpPreview.showMpqStatus",
+				"command": "blpPreviewPro.showMpqStatus",
 				"title": "Show MPQ Status",
 				"category": "Blp Preview"
 			},
 			{
-				"command": "blpPreview.openMpq",
+				"command": "blpPreviewPro.openMpq",
 				"title": "Open MPQ Resource",
 				"category": "Blp Preview"
 			},
 			{
-				"command": "blpPreview.openW3X",
+				"command": "blpPreviewPro.openW3X",
 				"title": "Open W3X Resource",
 				"category": "Blp Preview"
 			},
 			{
-				"command": "blpPreview.extractAll",
-				"title": "%blpPreview.extractAll%",
+				"command": "blpPreviewPro.extractAll",
+				"title": "%blpPreviewPro.extractAll%",
 				"category": "Blp Preview"
 			},
 			{
-				"command": "blpPreview.exploreW3XFile",
-				"title": "%blpPreview.exploreW3XFile%",
+				"command": "blpPreviewPro.exploreW3XFile",
+				"title": "%blpPreviewPro.exploreW3XFile%",
 				"category": "Blp Preview"
 			},
 			{
-				"command": "blpPreview.w3xExplorerClear",
-				"title": "%blpPreview.w3xExplorerClear%",
+				"command": "blpPreviewPro.w3xExplorerClear",
+				"title": "%blpPreviewPro.w3xExplorerClear%",
 				"category": "Blp Preview"
 			},
 			{
-				"command": "blpPreview.extractFile",
-				"title": "%blpPreview.extractFile%",
+				"command": "blpPreviewPro.extractFile",
+				"title": "%blpPreviewPro.extractFile%",
 				"category": "Blp Preview"
 			},
 			{
-				"command": "blpPreview.extractFileWithTexture",
-				"title": "%blpPreview.extractFileWithTexture%",
+				"command": "blpPreviewPro.extractFileWithTexture",
+				"title": "%blpPreviewPro.extractFileWithTexture%",
 				"category": "Blp Preview"
 			},
 			{
-				"command": "blpPreview.copyModel",
-				"title": "%blpPreview.copyModel%",
+				"command": "blpPreviewPro.copyModel",
+				"title": "%blpPreviewPro.copyModel%",
 				"category": "Blp Resource"
 			},
 			{
-				"command": "blpPreview.copyFile",
-				"title": "%blpPreview.copyFile%",
+				"command": "blpPreviewPro.copyFile",
+				"title": "%blpPreviewPro.copyFile%",
 				"category": "Blp Resource"
 			},
 			{
-				"command": "blpPreview.convert2png",
-				"title": "%blpPreview.convert2png%",
+				"command": "blpPreviewPro.convert2png",
+				"title": "%blpPreviewPro.convert2png%",
 				"category": "Blp Preview"
 			},
 			{
-				"command": "blpPreview.convert2jpg",
-				"title": "%blpPreview.convert2jpg%",
+				"command": "blpPreviewPro.convert2jpg",
+				"title": "%blpPreviewPro.convert2jpg%",
 				"category": "Blp Preview"
 			},
 			{
-				"command": "blpPreview.convert2blp",
-				"title": "%blpPreview.convert2blp%",
+				"command": "blpPreviewPro.convert2blp",
+				"title": "%blpPreviewPro.convert2blp%",
 				"category": "Blp Preview"
 			},
 			{
-				"command": "blpPreview.convert2mdl",
-				"title": "%blpPreview.convert2mdl%",
+				"command": "blpPreviewPro.convert2mdl",
+				"title": "%blpPreviewPro.convert2mdl%",
 				"category": "Blp Preview"
 			},
 			{
-				"command": "blpPreview.convert2mdx",
-				"title": "%blpPreview.convert2mdx%",
+				"command": "blpPreviewPro.convert2mdx",
+				"title": "%blpPreviewPro.convert2mdx%",
 				"category": "Blp Preview"
 			},
 			{
-				"command": "blpPreview.copyPath",
-				"title": "%blpPreview.copyPath%",
+				"command": "blpPreviewPro.copyPath",
+				"title": "%blpPreviewPro.copyPath%",
 				"category": "Blp Preview"
 			}
 		],
 		"menus": {
 			"view/title": [
 				{
-					"command": "blpPreview.selectMpqLocation",
-					"when": "view == blpPreview.mpqExplorer"
+					"command": "blpPreviewPro.selectMpqLocation",
+					"when": "view == blpPreviewPro.mpqExplorer"
 				},
 				{
-					"command": "blpPreview.reloadMpqArchives",
-					"when": "view == blpPreview.mpqExplorer"
+					"command": "blpPreviewPro.reloadMpqArchives",
+					"when": "view == blpPreviewPro.mpqExplorer"
 				},
 				{
-					"command": "blpPreview.showMpqStatus",
-					"when": "view == blpPreview.mpqExplorer"
+					"command": "blpPreviewPro.showMpqStatus",
+					"when": "view == blpPreviewPro.mpqExplorer"
 				},
 				{
-					"command": "blpPreview.w3xExplorerClear",
-					"when": "view == blpPreview.w3xExplorer"
+					"command": "blpPreviewPro.w3xExplorerClear",
+					"when": "view == blpPreviewPro.w3xExplorer"
 				}
 			],
 			"editor/title/context": [
 				{
-					"command": "blpPreview.exploreW3XFile",
+					"command": "blpPreviewPro.exploreW3XFile",
 					"when": "resourceExtname == .w3x || resourceExtname == .w3m || resourceExtname == .mpq"
 				},
 				{
-					"command": "blpPreview.extractAll",
+					"command": "blpPreviewPro.extractAll",
 					"when": "resourceExtname == .w3x || resourceExtname == .w3m || resourceExtname == .mpq"
 				}
 			],
 			"view/item/context": [
 				{
-					"command": "blpPreview.copyPath",
-					"when": "view == blpPreview.mpqExplorer && viewItem =~ /file$/i"
+					"command": "blpPreviewPro.copyPath",
+					"when": "view == blpPreviewPro.mpqExplorer && viewItem =~ /file$/i"
 				},
 				{
-					"command": "blpPreview.extractFile",
-					"when": "view == blpPreview.w3xExplorer && viewItem =~ /file$/i"
+					"command": "blpPreviewPro.extractFile",
+					"when": "view == blpPreviewPro.w3xExplorer && viewItem =~ /file$/i"
 				},
 				{
-					"command": "blpPreview.extractFileWithTexture",
-					"when": "view == blpPreview.w3xExplorer && viewItem == mdxFile"
+					"command": "blpPreviewPro.extractFileWithTexture",
+					"when": "view == blpPreviewPro.w3xExplorer && viewItem == mdxFile"
 				},
 				{
-					"command": "blpPreview.copyModel",
-					"when": "view == blpPreview.w3xExplorer && viewItem == mdxFile"
+					"command": "blpPreviewPro.copyModel",
+					"when": "view == blpPreviewPro.w3xExplorer && viewItem == mdxFile"
 				},
 				{
-					"command": "blpPreview.copyFile",
-					"when": "view == blpPreview.w3xExplorer && viewItem =~ /file$/i"
+					"command": "blpPreviewPro.copyFile",
+					"when": "view == blpPreviewPro.w3xExplorer && viewItem =~ /file$/i"
 				},
 				{
-					"command": "blpPreview.extractAll",
-					"when": "view == blpPreview.w3xExplorer && viewItem == w3x"
+					"command": "blpPreviewPro.extractAll",
+					"when": "view == blpPreviewPro.w3xExplorer && viewItem == w3x"
 				}
 			],
 			"explorer/context": [
 				{
-					"command": "blpPreview.exploreW3XFile",
+					"command": "blpPreviewPro.exploreW3XFile",
 					"when": "resourceExtname == .w3x || resourceExtname == .w3m || resourceExtname == .mpq"
 				},
 				{
-					"command": "blpPreview.extractAll",
+					"command": "blpPreviewPro.extractAll",
 					"when": "resourceExtname == .w3x || resourceExtname == .w3m || resourceExtname == .mpq"
 				},
 				{
 					"when": "resourceExtname == .blp",
-					"command": "blpPreview.convert2png"
+					"command": "blpPreviewPro.convert2png"
 				},
 				{
 					"when": "resourceExtname == .blp",
-					"command": "blpPreview.convert2jpg"
+					"command": "blpPreviewPro.convert2jpg"
 				},
 				{
 					"when": "resourceExtname == .png || resourceExtname == .jpg || resourceExtname == .jpeg",
-					"command": "blpPreview.convert2blp"
+					"command": "blpPreviewPro.convert2blp"
 				},
 				{
 					"when": "resourceExtname == .mdx",
-					"command": "blpPreview.convert2mdl"
+					"command": "blpPreviewPro.convert2mdl"
 				},
 				{
 					"when": "resourceExtname == .mdl",
-					"command": "blpPreview.convert2mdx"
+					"command": "blpPreviewPro.convert2mdx"
 				}
 			]
 		},
 		"configuration": {
 			"type": "object",
-			"title": "blpPreview configuration",
+			"title": "blpPreviewPro configuration",
 			"properties": {
-				"blpPreview.mpqLocation": {
+				"blpPreviewPro.mpqLocation": {
 					"type": "string",
 					"default": "",
-					"description": "%blpPreview.mpqLocation.desc%"
+					"description": "%blpPreviewPro.mpqLocation.desc%"
 				},
-				"blpPreview.retainContextWhenHidden": {
+				"blpPreviewPro.retainContextWhenHidden": {
 					"type": "boolean",
 					"default": false,
-					"description": "%blpPreview.retainContextWhenHidden.desc%"
+					"description": "%blpPreviewPro.retainContextWhenHidden.desc%"
 				},
-				"blpPreview.convert2blp": {
+				"blpPreviewPro.convert2blp": {
 					"type": "boolean",
 					"default": false,
-					"description": "%blpPreview.convert2blp.desc%"
+					"description": "%blpPreviewPro.convert2blp.desc%"
 				},
-				"blpPreview.convert2mdl": {
+				"blpPreviewPro.convert2mdl": {
 					"type": "boolean",
 					"default": false,
-					"description": "%blpPreview.convert2mdl.desc%"
+					"description": "%blpPreviewPro.convert2mdl.desc%"
 				},
-				"blpPreview.convert2mdx": {
+				"blpPreviewPro.convert2mdx": {
 					"type": "boolean",
 					"default": false,
-					"description": "%blpPreview.convert2mdx.desc%"
+					"description": "%blpPreviewPro.convert2mdx.desc%"
 				},
-				"blpPreview.convert2jpg": {
+				"blpPreviewPro.convert2jpg": {
 					"type": "boolean",
 					"default": false,
-					"description": "%blpPreview.convert2jpg.desc%"
+					"description": "%blpPreviewPro.convert2jpg.desc%"
 				},
-				"blpPreview.convert2png": {
+				"blpPreviewPro.convert2png": {
 					"type": "boolean",
 					"default": false,
-					"description": "%blpPreview.convert2png.desc%"
+					"description": "%blpPreviewPro.convert2png.desc%"
 				}
 			}
 		}

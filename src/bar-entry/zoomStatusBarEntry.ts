@@ -9,7 +9,7 @@ import { PreviewStatusBarEntry as OwnedStatusBarEntry } from './PreviewStatusBar
 
 const localize = nls.loadMessageBundle();
 
-const selectZoomLevelCommandId = '_blpPreview.selectZoomLevel';
+const selectZoomLevelCommandId = '_blpPreviewPro.selectZoomLevel';
 
 export type Scale = number | 'fit';
 
@@ -19,7 +19,7 @@ export class ZoomStatusBarEntry extends OwnedStatusBarEntry {
 	public readonly onDidChangeScale = this._onDidChangeScale.event;
 
 	constructor() {
-		super('status.blpPreview.zoom', localize('zoomStatusBar.name', "Image Zoom"), vscode.StatusBarAlignment.Right, 102 /* to the left of editor size entry (101) */);
+		super('status.blpPreviewPro.zoom', localize('zoomStatusBar.name', "Image Zoom"), vscode.StatusBarAlignment.Right, 102 /* to the left of editor size entry (101) */);
 
 		this._register(vscode.commands.registerCommand(selectZoomLevelCommandId, async () => {
 			type MyPickItem = vscode.QuickPickItem & { scale: Scale };

@@ -45,7 +45,7 @@ function helperNodeToMpqItemNodes(node: MpqTreeHelperNode) {
     }).map(v => {
         return new MpqItemNode(v.name, v, v.isLeaf() ? vscode.TreeItemCollapsibleState.None : vscode.TreeItemCollapsibleState.Collapsed, {
             title: 'Open with w3x',
-            command: 'blpPreview.openW3X',
+            command: 'blpPreviewPro.openW3X',
             arguments: [v.rootUri.with({
                 scheme: 'w3x',
                 path: v.rootUri.path,
@@ -66,17 +66,17 @@ export class W3XTreeProvider implements vscode.TreeDataProvider<MpqItemNode | W3
     }
 
     registerCommands(ctx: BlpPreviewContext) {
-        commandMap.set('blpPreview.exploreW3XFile', (uri?: Uri) => {
+        commandMap.set('blpPreviewPro.exploreW3XFile', (uri?: Uri) => {
             const target = resolveArchiveUri(uri);
             if (!target) {
                 return;
             }
             this.openW3X(target);
         });
-        commandMap.set('blpPreview.w3xExplorerClear', (uri: Uri) => {
+        commandMap.set('blpPreviewPro.w3xExplorerClear', (uri: Uri) => {
             this.clear();
         });
-        commandMap.set('blpPreview.copyModel', async (node: MpqItemNode) => {
+        commandMap.set('blpPreviewPro.copyModel', async (node: MpqItemNode) => {
             const nodePath = node.node.rootUri.path.replace(/^.+\.w3x\\/ig, '');
             let ext = path.extname(nodePath).toLowerCase();
             if (!['.mdx', ".mdl"].includes(ext)) { return; }
@@ -99,7 +99,7 @@ export class W3XTreeProvider implements vscode.TreeDataProvider<MpqItemNode | W3
 
             contentCopy(map);
         });
-        commandMap.set('blpPreview.copyFile', async (node: MpqItemNode) => {
+        commandMap.set('blpPreviewPro.copyFile', async (node: MpqItemNode) => {
             const nodePath = node.node.rootUri.path.replace(/^.+\.w3x\\/ig, '');
             if(!nodePath.trim()) {
                 return;
@@ -115,11 +115,11 @@ export class W3XTreeProvider implements vscode.TreeDataProvider<MpqItemNode | W3
             map[resourceName] = tmpPath;
             contentCopy(map);
         });
-        commandMap.set('blpPreview.extractFile', (node: MpqItemNode) => {
+        commandMap.set('blpPreviewPro.extractFile', (node: MpqItemNode) => {
             const resourcePath = node.node.rootUri.path.replace(/\\/g, '/');
             vscode.window.showSaveDialog({
                 defaultUri: vscode.Uri.file(path.basename(resourcePath)),
-                title: localize('blpPreview.saveBlpFolder', 'Select'),
+                title: localize('blpPreviewPro.saveBlpFolder', 'Select'),
                 filters: {
                     'w3xfiles': [path.extname(resourcePath).slice(1)]
                 },
@@ -127,15 +127,15 @@ export class W3XTreeProvider implements vscode.TreeDataProvider<MpqItemNode | W3
                 if (fileUri) {
                     ctx.edit.createFile(fileUri, { ignoreIfExists: true });
                     fs.writeFileSync(fileUri.fsPath, await this.getBufferContent(node.node.rootUri));
-                    return vscode.window.showInformationMessage(localize("blpPreview.extractSuccess", "extract success"));
+                    return vscode.window.showInformationMessage(localize("blpPreviewPro.extractSuccess", "extract success"));
                 }
             });
         });
-        commandMap.set('blpPreview.extractFileWithTexture', (node: MpqItemNode) => {
+        commandMap.set('blpPreviewPro.extractFileWithTexture', (node: MpqItemNode) => {
             const resourcePath = node.node.rootUri.path.replace(/\\/g, '/');
             vscode.window.showSaveDialog({
                 defaultUri: vscode.Uri.file(path.basename(resourcePath)),
-                title: localize('blpPreview.saveBlpFolder', 'Select'),
+                title: localize('blpPreviewPro.saveBlpFolder', 'Select'),
                 filters: {
                     'w3xfiles': ['mdx']
                 },
@@ -151,18 +151,18 @@ export class W3XTreeProvider implements vscode.TreeDataProvider<MpqItemNode | W3
                         ctx.edit.createFile(distPath, { ignoreIfExists: true });
                         fs.writeFileSync(distPath.fsPath, ret.blps[i]);
                     }
-                    return vscode.window.showInformationMessage(localize("blpPreview.extractSuccess", "extract success"));
+                    return vscode.window.showInformationMessage(localize("blpPreviewPro.extractSuccess", "extract success"));
                 }
             });
         });
-        commandMap.set('blpPreview.extractAll', (uri?: Uri) => {
+        commandMap.set('blpPreviewPro.extractAll', (uri?: Uri) => {
             const target = resolveArchiveUri(uri);
             if (!target) {
                 return;
             }
             vscode.window.showOpenDialog({
                 canSelectMany: false,
-                openLabel: localize('blpPreview.saveBlpFolder', 'Select'),
+                openLabel: localize('blpPreviewPro.saveBlpFolder', 'Select'),
                 canSelectFiles: false,
                 canSelectFolders: true,
             }).then(folders => {

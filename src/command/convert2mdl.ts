@@ -4,14 +4,14 @@ import { localize } from '../localize';
 import commandMap from "./helper/commands";
 import { mdx2mdl } from './helper/mdl2mdx';
 
-commandMap.set('blpPreview.convert2mdl', async function (uri: vscode.Uri, selectURI: vscode.Uri[]) {
+commandMap.set('blpPreviewPro.convert2mdl', async function (uri: vscode.Uri, selectURI: vscode.Uri[]) {
     const data = vscode.workspace.getConfiguration("convert2mdl");
     const shouldReplaceExt = data && data.convert2mdl ? data.convert2mdl : false;
 
     if (selectURI.length > 1) {
         vscode.window.showOpenDialog({
             canSelectMany: false,
-            openLabel: localize('blpPreview.saveBlpFolder', 'Select'),
+            openLabel: localize('blpPreviewPro.saveBlpFolder', 'Select'),
             canSelectFiles: false,
             canSelectFolders: true,
         }).then(async folders => {
@@ -25,7 +25,7 @@ commandMap.set('blpPreview.convert2mdl', async function (uri: vscode.Uri, select
                     const buf = await vscode.workspace.fs.readFile(uri);
                     mdx2mdl(buf, distPath.fsPath);
                 }
-                return vscode.window.showInformationMessage(localize("blpPreview.convertSuccess", "convert success"));
+                return vscode.window.showInformationMessage(localize("blpPreviewPro.convertSuccess", "convert success"));
             }
         });
     } else {
@@ -34,7 +34,7 @@ commandMap.set('blpPreview.convert2mdl', async function (uri: vscode.Uri, select
             this.edit.createFile(distPath, { ignoreIfExists: true });
             const buf = await vscode.workspace.fs.readFile(uri);
             mdx2mdl(buf, distPath.fsPath);
-            await vscode.window.showInformationMessage(localize("blpPreview.convertSuccess", "convert success"));
+            await vscode.window.showInformationMessage(localize("blpPreviewPro.convertSuccess", "convert success"));
         } catch (e) {
             console.error(e);
         }

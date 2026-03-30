@@ -9,7 +9,7 @@ import MdxPreview from './modelPreview/MdxPreview';
 import SlkPreview from './slkPreview/SlkPreview';
 
 export default class EditorProvider implements vscode.CustomReadonlyEditorProvider {
-	public static readonly viewType = 'blpPreview.previewEditor';
+	public static readonly viewType = 'blpPreviewPro.previewEditor';
 	private readonly _previews = new Set<BasePreview>();
 	private _activePreview: BasePreview | undefined;
 
@@ -69,6 +69,6 @@ export default class EditorProvider implements vscode.CustomReadonlyEditorProvid
 	}
 
 	private setPreviewActiveContext(value: boolean) {
-		vscode.commands.executeCommand('setContext', 'blpPreviewFocus', value);
+		vscode.commands.executeCommand('setContext', 'blpPreviewProFocus', value);
 	}
 }

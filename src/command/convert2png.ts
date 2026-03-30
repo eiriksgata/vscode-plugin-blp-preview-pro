@@ -4,13 +4,13 @@ import { localize } from '../localize';
 import blp2Image from './helper/blp2img';
 import commandMap from "./helper/commands";
 
-commandMap.set('blpPreview.convert2png', async function (uri: vscode.Uri, selectURI: vscode.Uri[]) {
+commandMap.set('blpPreviewPro.convert2png', async function (uri: vscode.Uri, selectURI: vscode.Uri[]) {
     const data = vscode.workspace.getConfiguration("convert2png");
     const shouldReplaceExt = data && data.convert2png ? data.convert2png : false;
     if (selectURI.length > 1) {
         vscode.window.showOpenDialog({
             canSelectMany: false,
-            openLabel: localize('blpPreview.saveBlpFolder', 'Select'),
+            openLabel: localize('blpPreviewPro.saveBlpFolder', 'Select'),
             canSelectFiles: false,
             canSelectFolders: true,
         }).then(folders => {
@@ -23,13 +23,13 @@ commandMap.set('blpPreview.convert2png', async function (uri: vscode.Uri, select
                     this.edit.createFile(distPath, { ignoreIfExists: true });
                     blp2Image(uri.fsPath, distPath.fsPath, 'png');
                 }
-                return vscode.window.showInformationMessage(localize("blpPreview.convertSuccess", "convert success"));
+                return vscode.window.showInformationMessage(localize("blpPreviewPro.convertSuccess", "convert success"));
             }
         });
     } else {
         const distPath = uri.with({ path: shouldReplaceExt ? uri.path.replace(/\.(blp)$/i, '.png') : uri.path + '.png' });
         this.edit.createFile(distPath, { ignoreIfExists: true });
         blp2Image(uri.fsPath, distPath.fsPath, 'png');
-        await vscode.window.showInformationMessage(localize("blpPreview.convertSuccess", "convert success"));
+        await vscode.window.showInformationMessage(localize("blpPreviewPro.convertSuccess", "convert success"));
     }
 });
