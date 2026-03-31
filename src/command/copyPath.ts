@@ -5,5 +5,10 @@ import type { MpqNode } from '../tree-provider/mpq/mpq-node';
 import commandMap from './helper/commands';
 
 commandMap.set('blpPreviewPro.copyPath', async (node: MpqNode) => {
-    vscode.env.clipboard.writeText(node.resourceUri.path.replace(/^.+\.mpq\\/ig, ''));
+    const resourcePath = node.resourceUri?.path;
+    if (!resourcePath) {
+        return;
+    }
+
+    await vscode.env.clipboard.writeText(resourcePath.replace(/^.+\.mpq\\/ig, ''));
 });

@@ -43,6 +43,7 @@
 		"forceConsistentCasingInFileNames": true,
 
 		"resolveJsonModule": true,
+		"allowArbitraryExtensions": true,
 		"skipLibCheck": true,
 
 		"declaration": true,

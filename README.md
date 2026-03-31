@@ -81,6 +81,85 @@ For full texture support in model preview, configure your MPQ archive:
 }
 ```
 
+## 🛠 Build Plugin
+
+This section provides quick commands to build and package the extension locally.
+
+### Requirements
+
+- Node.js `>=20`
+- Bun `>=1.0` (recommended) or npm
+- VS Code
+
+### Install Dependencies
+
+Use Bun (recommended):
+
+```bash
+bun install
+```
+
+Or use npm:
+
+```bash
+npm install
+```
+
+### Compile in Development
+
+```bash
+bun run compile
+```
+
+Watch mode:
+
+```bash
+bun run watch
+```
+
+### Build Production Bundle
+
+```bash
+bun run package
+```
+
+### Package as VSIX
+
+If `vsce` is not installed globally, run:
+
+```bash
+bunx @vscode/vsce package --out blp-preview-pro.vsix
+```
+
+Or with npm:
+
+```bash
+npx @vscode/vsce package --out blp-preview-pro.vsix
+```
+
+### Install VSIX Locally
+
+```bash
+code --install-extension blp-preview-pro.vsix
+```
+
+### Quick Command Reference
+
+| Goal | Bun | npm |
+| --- | --- | --- |
+| Install deps | `bun install` | `npm install` |
+| Compile | `bun run compile` | `npm run compile` |
+| Watch | `bun run watch` | `npm run watch` |
+| Production build | `bun run package` | `npm run package` |
+| Lint | `bun run lint` | `npm run lint` |
+| Test | `bun run test` | `npm run test` |
+
+### Troubleshooting
+
+- If native binding fails to load, verify your OS/arch matches files under `bind/`.
+- If TypeScript errors appear after dependency changes, run `bun install` again and reload VS Code.
+- If packaging fails, ensure your working tree includes `dist/` after `bun run package`.
+
 ## 📖 Usage
 
 ### Preview Assets

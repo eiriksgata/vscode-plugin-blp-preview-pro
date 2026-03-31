@@ -4,8 +4,8 @@ import htmlTemplate from './index.html';
 
 export default class BlpPreview extends BasePreview {
 
-    protected _imageSize: string | undefined;
-    protected _imageZoom: number | 'fit';
+    protected imageSize: string | undefined;
+    protected imageZoom: number | 'fit' = 'fit';
 
     getCssSource(): string[] {
         return [
@@ -24,22 +24,24 @@ export default class BlpPreview extends BasePreview {
         ];
     }
 
-    getHTMLTempalte() {
+    getHTMLTempalte(): string {
         return htmlTemplate;
     }
 
-    onMessage(message: any): void {
+    onMessage(message: { type?: string; value?: unknown }): void {
         super.onMessage(message);
         switch (message.type) {
             case 'size':
                 {
-                    this._imageSize = message.value;
+                    this.imageSize = typeof message.value === 'string' ? message.value : '';
                     this.update();
                     break;
                 }
             case 'zoom':
                 {
-                    this._imageZoom = message.value;
+                    this.imageZoom = message.value === 'fit' || typeof message.value === 'number'
+                        ? message.value
+                        : 'fit';
                     this.update();
                     break;
                 }
@@ -52,10 +54,10 @@ export default class BlpPreview extends BasePreview {
         }
     }
 
-    onActive() {
-        this.ctx.sizeStatusBarEntry.show(this.id, this._imageSize || '');
+    onActive(): void {
+        this.ctx.sizeStatusBarEntry.show(this.id, this.imageSize || '');
         this.ctx.binarySizeStatusBarEntry.show(this.id, this._imageBinarySize);
-        this.ctx.zoomStatusBarEntry.show(this.id, this._imageZoom || 'fit');
+        this.ctx.zoomStatusBarEntry.show(this.id, this.imageZoom || 'fit');
     }
 
     onVisible(): void {

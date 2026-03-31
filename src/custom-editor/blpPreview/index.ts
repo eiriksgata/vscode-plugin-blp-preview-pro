@@ -24,7 +24,7 @@ declare global {
     const message: Message;
 
     class TGA {
-        load(buf: any): void;
+        load(buf: ArrayBuffer | Uint8Array | Buffer): void;
         getDataURL(): string;
     }
 }
@@ -35,16 +35,16 @@ declare global {
  * @param {number} max
  * @return {number}
  */
-function clamp(value: number, min: number, max: number) {
+function clamp(value: number, min: number, max: number): number {
     return Math.min(Math.max(value, min), max);
 }
 
-function getSettings() {
+function getSettings(): { isMac: boolean } {
     const element = document.getElementById('image-preview-settings');
     if (element) {
         const data = element.getAttribute('data-settings');
         if (data) {
-            return JSON.parse(data);
+            return JSON.parse(data) as { isMac: boolean };
         }
     }
 
@@ -106,7 +106,7 @@ let isActive = false;
 const container = document.body;
 const image = document.createElement('img');
 
-function updateScale(newScale: number | 'fit') {
+function updateScale(newScale: number | 'fit'): void {
     if (!image || !hasLoadedImage || !image.parentElement) {
         return;
     }
@@ -151,7 +151,7 @@ function updateScale(newScale: number | 'fit') {
     });
 }
 
-function setActive(value) {
+function setActive(value: boolean): void {
     isActive = value;
     if (value) {
         if (isMac ? altPressed : ctrlPressed) {
@@ -169,7 +169,7 @@ function setActive(value) {
     }
 }
 
-function firstZoom() {
+function firstZoom(): void {
     if (!image || !hasLoadedImage) {
         return;
     }
@@ -178,28 +178,32 @@ function firstZoom() {
     updateScale(scale);
 }
 
-function zoomIn() {
+function zoomIn(): void {
     if (scale === 'fit') {
         firstZoom();
     }
 
+    const currentScale = scale === 'fit' ? 1 : scale;
+
     let i = 0;
     for (; i < zoomLevels.length; ++i) {
-        if (zoomLevels[i] > scale) {
+        if (zoomLevels[i] > currentScale) {
             break;
         }
     }
     updateScale(zoomLevels[i] || MAX_SCALE);
 }
 
-function zoomOut() {
+function zoomOut(): void {
     if (scale === 'fit') {
         firstZoom();
     }
 
+    const currentScale = scale === 'fit' ? 1 : scale;
+
     let i = zoomLevels.length - 1;
     for (; i >= 0; --i) {
-        if (zoomLevels[i] < scale) {
+        if (zoomLevels[i] < currentScale) {
             break;
         }
     }
@@ -299,7 +303,7 @@ container.addEventListener('wheel', ( /** @type {WheelEvent} */ e) => {
     passive: false
 });
 
-window.addEventListener('scroll', e => {
+window.addEventListener('scroll', () => {
     if (!image || !hasLoadedImage || !image.parentElement || scale === 'fit') {
         return;
     }
@@ -342,7 +346,7 @@ image.addEventListener('load', () => {
     }
 });
 
-image.addEventListener('error', e => {
+image.addEventListener('error', () => {
     if (hasLoadedImage) {
         return;
     }
@@ -360,21 +364,27 @@ message.load().then(async ({ buf, ext }) => {
         canvas.width = blp.width;
         canvas.height = blp.height;
         const img = await createImageBitmap(getImageData(blp, 0));
-        const ctx = canvas.getContext("2d")!;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+            return;
+        }
         ctx.drawImage(img, 0, 0);
         image.src = canvas.toDataURL();
     } else {
-        var tga = new TGA();
+        const tga = new TGA();
         tga.load(buf);
         image.src = tga.getDataURL();
     }
 });
 
-document.querySelector('.open-file-link')!.addEventListener('click', () => {
-    vscode.postMessage({
-        type: 'reopen-as-text',
+const openFileLink = document.querySelector('.open-file-link');
+if (openFileLink) {
+    openFileLink.addEventListener('click', () => {
+        vscode.postMessage({
+            type: 'reopen-as-text',
+        });
     });
-});
+}
 
 window.addEventListener('message', async e => {
     switch (e.data.type) {
