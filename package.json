@@ -1,7 +1,7 @@
 {
 	"name": "blp-preview-pro",
-	"displayName": "blp-preview-pro",
-	"description": "A VSCode extension for previewing Warcraft III resources, with support for MPQ archives and W3X maps.",
+	"displayName": "BLP Preview Pro - Warcraft III Assets Viewer",
+	"description": "Professional Warcraft III asset viewer with BLP/TGA image preview, MPQ archive explorer, W3X map visualization, 3D model display, and format conversion tools. Enhanced edition with advanced file browsing and resource extraction capabilities.",
 	"version": "1.1.0",
 	"publisher": "eiriksgata",
 	"license": "MIT",
