@@ -1,0 +1,20 @@
+# Bun Configuration for BLP Preview Pro
+
+[install]
+# 使用在线模式确保依赖完整
+prefer = "online"
+
+# 并发安装数 - 加速安装
+concurrent = 6
+
+# 自动信任特定工具的生命周期脚本
+trust = ["webpack", "esbuild", "vsce"]
+
+[run]
+# 使用系统 shell 运行脚本
+shell = "system"
+
+# 定义常用环境变量
+env = {
+  "NODE_ENV" = "development"
+}

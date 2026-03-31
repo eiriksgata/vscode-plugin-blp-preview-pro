@@ -1,34 +1,66 @@
 {
 	"compilerOptions": {
-		"module": "commonjs",
-		"target": "es6",
-		"outDir": "out",
-		"lib": [
-			"es6",
-			"DOM"
-		],
-		"allowSyntheticDefaultImports": true,
-		"noImplicitAny": false,
-		"strictPropertyInitialization": false,
+		"module": "nodenext",
+		"target": "es2020",
+		"moduleResolution": "nodenext",
+		"ignoreDeprecations": "6.0",
+		"lib": ["es2020", "dom", "dom.iterable"],
+
+		"outDir": "./out",
+		"rootDir": "./src",
+		"baseUrl": "./src",
+		"paths": {
+			"@common/*": ["common/*"],
+			"@custom-editor/*": ["custom-editor/*"],
+			"@command/*": ["command/*"],
+			"@mpq/*": ["mpq-manager/*"],
+			"@parser/*": ["parser/*"],
+			"@tree-provider/*": ["tree-provider/*"],
+			"@types/*": ["types/*"],
+			"@bar-entry/*": ["bar-entry/*"]
+		},
+
 		"sourceMap": true,
-		"rootDir": "src",
+		"inlineSources": true,
+		"declarationMap": true,
+
+		"strict": true,
+		"noImplicitAny": true,
+		"strictNullChecks": true,
+		"strictFunctionTypes": true,
+		"strictBindCallApply": true,
+		"strictPropertyInitialization": true,
+		"noImplicitThis": true,
+		"alwaysStrict": true,
+
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"noImplicitReturns": true,
+		"noFallthroughCasesInSwitch": true,
+
+		"esModuleInterop": true,
+		"allowSyntheticDefaultImports": true,
+		"forceConsistentCasingInFileNames": true,
+
+		"resolveJsonModule": true,
 		"skipLibCheck": true,
-		"strict": false /* enable all strict type-checking options */
-		/* Additional Checks */
-		// "noImplicitReturns": true, /* Report error when not all code paths in function return a value. */
-		// "noFallthroughCasesInSwitch": true, /* Report errors for fallthrough cases in switch statement. */
-		// "noUnusedParameters": true,  /* Report errors on unused parameters. */
+
+		"declaration": true,
+		"emitDecoratorMetadata": true,
+		"experimentalDecorators": true,
+
+		"useDefineForClassFields": true
 	},
 	"include": [
 		"src/types/*.d.ts",
-		"src/**/*", "EditorProvider.ts",
+		"src/**/*.ts"
 	],
 	"exclude": [
 		"node_modules",
 		"node_modules/war3-model/*",
-		"./node_modules",
-		"./node_modules/*",
-		"./node_modules/war3-model/*",
-		".vscode-test"
-	],
+		".vscode-test",
+		"dist",
+		"out",
+		"build"
+	]
 }
