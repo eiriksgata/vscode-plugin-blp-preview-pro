@@ -1,11 +1,23 @@
 import * as vscode from 'vscode';
 import BasePreview from "../BasePreview";
 import htmlTemplate from './index.html';
+import { BlpPreviewEventMiddleware } from '../events/blp-preview-adapter';
+import { BlpPreviewEvents } from '../events/preview-events';
 
 export default class BlpPreview extends BasePreview {
 
     protected imageSize: string | undefined;
     protected imageZoom: number | 'fit' = 'fit';
+    private eventMiddleware: BlpPreviewEventMiddleware;
+ constructor(
+        extensionRoot: vscode.Uri,
+        resource: vscode.Uri,
+        webviewEditor: vscode.WebviewPanel,
+        ctx: any // BlpPreviewContext - avoid circular import
+    ) {
+        super(extensionRoot, resource, webviewEditor, ctx);
+        this.eventMiddleware = new BlpPreviewEventMiddleware();
+    }
 
     getCssSource(): string[] {
         return [
@@ -30,28 +42,19 @@ export default class BlpPreview extends BasePreview {
 
     onMessage(message: { type?: string; value?: unknown }): void {
         super.onMessage(message);
-        switch (message.type) {
-            case 'size':
-                {
-                    this.imageSize = typeof message.value === 'string' ? message.value : '';
-                    this.update();
-                    break;
-                }
-            case 'zoom':
-                {
-                    this.imageZoom = message.value === 'fit' || typeof message.value === 'number'
-                        ? message.value
-                        : 'fit';
-                    this.update();
-                    break;
-                }
-
-            case 'reopen-as-text':
-                {
-                    vscode.commands.executeCommand('vscode.openWith', this.resource, 'default', this.webviewEditor.viewColumn);
-                    break;
-                }
-        }
+        this.eventMiddleware.handleMessage(message, {
+            onSizeChange: (event: BlpPreviewEvents.SizeEvent) => {
+                this.imageSize = event.value;
+                this.update();
+            },
+            onZoomChange: (event: BlpPreviewEvents.ZoomEvent) => {
+                this.imageZoom = event.value;
+                this.update();
+            },
+            onReopenAsText: (event: BlpPreviewEvents.ReopenAsTextEvent) => {
+                vscode.commands.executeCommand('vscode.openWith', this.resource, 'default', this.webviewEditor.viewColumn);
+            }
+        });
     }
 
     onActive(): void {

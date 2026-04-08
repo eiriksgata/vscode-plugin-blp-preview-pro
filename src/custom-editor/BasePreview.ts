@@ -3,6 +3,8 @@ import { Disposable } from "../common/dispose";
 import Message from '../common/message';
 import MpqManager from '../mpq-manager';
 import { BlpPreviewContext } from '../extension';
+import { WebviewHtmlBuilder } from './runtime/webview-builder';
+import { RuntimeContextSerializer, RuntimeContext } from './runtime/runtime-context';
 
 export enum ViewState {
     disposed,
@@ -143,44 +145,44 @@ export default class BasePreview extends Disposable {
     }
 
     private async getWebviewContents() {
-        const settings = {
-            isMac: isMac(),
+        // 步骤1: 创建运行时上下文
+        const context: RuntimeContext = RuntimeContextSerializer.createDefault(this.resource);
+        
+        // 步骤2: 获取预览类型定义的 CSS 和 JS 源
+        const cssSources = this.getCssSource();
+        const jsSources = this.getJSSource();
+        const htmlTemplate = this.getHTMLTempalte();
+
+        // 步骤3: 创建 HTML 构建器
+        const builder = new WebviewHtmlBuilder({
+            nonce: this.nonce,
+            cspSource: this.webviewEditor.webview.cspSource,
+            extensionRoot: this.extensionRoot,
+            debug: false,
+        });
+
+        // 步骤4: 生成 CSS 链接
+        const cssLinks = cssSources.length > 0 
+            ? builder.buildCSSLinks(cssSources, this.webviewEditor.webview)
+            : '';
+
+        // 步骤5: 生成 Bootstrap 脚本
+        const bootstrapScript = builder.buildBootstrapScript(this.resource);
+
+        // 步骤6: 生成 JS 脚本标签
+        const jsScripts = jsSources.length > 0
+            ? builder.buildScriptTags(jsSources, this.webviewEditor.webview)
+            : '';
+
+        // 步骤7: 组合为 HtmlFragment
+        const fragment = {
+            css: cssLinks,
+            html: htmlTemplate,
+            js: bootstrapScript + '\n        ' + jsScripts,
         };
 
-        const nonce = this.nonce;
-        const cspSource = this.webviewEditor.webview.cspSource;
-
-        return /* html */`<!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-
-        <!-- Disable pinch zooming -->
-        <meta name="viewport"
-            content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
-
-        <title>Image Preview</title>
-        ${this.getCssSource().map(source => {
-            return `<link rel="stylesheet" href="${escapeAttribute(this.extensionResource(source))}" type="text/css" media="screen" nonce="${nonce}">`
-        }).join('\n')
-            }
-        <meta http-equiv="Content-Security-Policy" content="default-src 'none';media-src * blob:; img-src data: ${cspSource}; script-src 'nonce-${nonce}'; style-src ${cspSource} 'nonce-${nonce}';">
-        <meta id="image-preview-settings" data-settings="${escapeAttribute(JSON.stringify(settings))}">
-    </head>
-    <body class="container image scale-to-fit loading">
-        ${this.getHTMLTempalte()}
-        <script type="text/javascript" nonce="${nonce}">
-            window.currentResourceURI = ${JSON.stringify(this.resource)};
-            window.module = {
-                exports: {},
-            };
-            window.vscode = acquireVsCodeApi();
-        </script>
-        ${this.getJSSource().map(source => {
-                return `<script src="${escapeAttribute(this.extensionResource(source))}" nonce="${nonce}"></script>`;
-            }).join('\n')}
-    </body>
-    </html>`;
+        // 步骤8: 构建完整 HTML
+        return builder.build(fragment);
     }
 
     private extensionResource(path: string) {
