@@ -112,7 +112,7 @@ ${body}
    * 生成 CSP 内容策略字符串
    */
   private buildCspContent(): string {
-    return `default-src 'none'; media-src * blob:; img-src data: ${this.cspSource}; script-src 'nonce-${this.nonce}'; style-src ${this.cspSource} 'nonce-${this.nonce}'`;
+    return `default-src 'none'; connect-src ${this.cspSource}; media-src * blob:; img-src data: ${this.cspSource}; script-src 'nonce-${this.nonce}'; style-src ${this.cspSource} 'nonce-${this.nonce}'`;
   }
 
   /**

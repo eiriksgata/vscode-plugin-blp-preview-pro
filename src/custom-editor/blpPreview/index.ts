@@ -356,6 +356,27 @@ image.addEventListener('error', () => {
     document.body.classList.remove('loading');
 });
 
+function toArrayBuffer(input: unknown): ArrayBuffer {
+    if (input instanceof ArrayBuffer) {
+        return input;
+    }
+
+    if (ArrayBuffer.isView(input)) {
+        const view = input as Uint8Array;
+        return view.buffer.slice(view.byteOffset, view.byteOffset + view.byteLength);
+    }
+
+    if (Array.isArray(input)) {
+        return new Uint8Array(input).buffer;
+    }
+
+    if (input && typeof input === 'object' && Array.isArray((input as { data?: number[] }).data)) {
+        return new Uint8Array((input as { data: number[] }).data).buffer;
+    }
+
+    throw new Error('Unsupported binary payload');
+}
+
 message.load().then(async ({ buf, ext }) => {
     if (ext.toLowerCase() === 'blp') {
         const blp = decode(buf);
@@ -371,9 +392,15 @@ message.load().then(async ({ buf, ext }) => {
         ctx.drawImage(img, 0, 0);
         image.src = canvas.toDataURL();
     } else {
-        const tga = new TGA();
-        tga.load(buf);
-        image.src = tga.getDataURL();
+        try {
+            const tga = new TGA();
+            tga.load(toArrayBuffer(buf));
+            image.src = tga.getDataURL();
+        } catch (error) {
+            console.error('Failed to decode TGA image', error);
+            document.body.classList.add('error');
+            document.body.classList.remove('loading');
+        }
     }
 });
 

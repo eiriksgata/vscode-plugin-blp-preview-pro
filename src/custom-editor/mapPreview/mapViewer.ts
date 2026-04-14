@@ -57,6 +57,10 @@ export default class MapViewer {
     waterIncreasePerFrame: number;
     tilesetTextures: any[] = [];
     cliffTextures: any[] = [];
+    /** 各地面贴图对应的原始 BLP 路径（小写），用于 CPU 端预览解码 */
+    tilesetTexturePaths: string[] = [];
+    /** 各悬崖贴图对应的原始 BLP 路径（小写），用于 CPU 端预览解码 */
+    cliffTexturePaths: string[] = [];
     waterTextures: any[] = [];
     columns: number;
     rows: number;
@@ -79,6 +83,9 @@ export default class MapViewer {
     terrainReady: boolean;
     anyReady: boolean;
     cliffsReady: boolean;
+    /** 地形（含纹理）加载完成后 resolve 的 Promise，供外部等待 */
+    readonly terrainReadyPromise: Promise<void>;
+    private _terrainReadyResolve!: () => void;
 
     groundShader: any;
     cliffShader: any;
@@ -95,6 +102,9 @@ export default class MapViewer {
     constructor(viewer: any, worldScene: any, buf: ArrayBuffer) {
         this.viewer = viewer;
         this.worldScene = worldScene;
+        this.terrainReadyPromise = new Promise<void>(resolve => {
+            this._terrainReadyResolve = resolve;
+        });
 
         this.groundShader = this.viewer.webgl.createShader(groundVert, groundFrag);
         this.cliffShader = this.viewer.webgl.createShader(cliffsVert, cliffsFrag);
@@ -174,8 +184,12 @@ export default class MapViewer {
 
             this.tilesets.push(row);
 
-            tilesetTextures.push(this.viewer.load(`${row.string('dir')}\\${row.string('file')}.blp`));
+            const groundPath = `${row.string('dir')}\\${row.string('file')}.blp`;
+            this.tilesetTexturePaths.push(groundPath.toLowerCase());
+            tilesetTextures.push(this.viewer.load(groundPath));
         }
+
+        console.info('[MapViewer] ground texture paths:', this.tilesetTexturePaths);
 
         const blights = {
             A: 'Ashen',
@@ -205,8 +219,12 @@ export default class MapViewer {
             const row = this.cliffTypesData.getRow(cliffTileset);
 
             this.cliffTilesets.push(row);
-            cliffTextures.push(this.viewer.load(`${row.string('texDir')}\\${row.string('texFile')}.blp`));
+            const cliffPath = `${row.string('texDir')}\\${row.string('texFile')}.blp`;
+            this.cliffTexturePaths.push(cliffPath.toLowerCase());
+            cliffTextures.push(this.viewer.load(cliffPath));
         }
+
+        console.info('[MapViewer] cliff texture paths:', this.cliffTexturePaths);
 
         const waterRow = this.waterData.getRow(`${tileset}Sha`);
         this.waterHeightOffset = waterRow.number('height');
@@ -227,6 +245,11 @@ export default class MapViewer {
         this.tilesetTextures = await Promise.all(tilesetTextures);
         this.cliffTextures = await Promise.all(cliffTextures);
         this.waterTextures = await Promise.all(waterTextures);
+        console.info('[MapViewer] texture load complete:', {
+            ground: this.tilesetTextures.length,
+            cliff: this.cliffTextures.length,
+            water: this.waterTextures.length,
+        });
 
         const corners = this.w3e.corners;
         const [columns, rows] = this.mapSize;
@@ -373,6 +396,7 @@ export default class MapViewer {
 
         this.terrainReady = true;
         this.anyReady = true;
+        this._terrainReadyResolve();
 
         const cliffShader = this.cliffShader;
 
@@ -624,12 +648,14 @@ export default class MapViewer {
             gl.uniform1f(uniforms['u_baseTileset'], 0);
 
             for (let i = 0, l = Math.min(tilesetCount, 15); i < l; i++) {
-                const isExtended = tilesetTextures[i].width > tilesetTextures[i].height ? 1 : 0;
+                const tex = tilesetTextures[i];
+                if (!tex) continue;
+                const isExtended = tex.width > tex.height ? 1 : 0;
 
                 gl.uniform1f(uniforms[`u_extended[${i}]`], isExtended);
                 gl.uniform1i(uniforms[`u_tilesets[${i}]`], i);
 
-                webgl.bindTexture(tilesetTextures[i], i);
+                webgl.bindTexture(tex, i);
             }
 
             instancedArrays.drawElementsInstancedANGLE(gl.TRIANGLES, 6, gl.UNSIGNED_BYTE, 0, this.rows * this.columns);
@@ -767,5 +793,122 @@ export default class MapViewer {
             instancedArrays.vertexAttribDivisorANGLE(isWaterAttrib, 0);
             instancedArrays.vertexAttribDivisorANGLE(instanceAttrib, 0);
         }
+    }
+
+    /**
+     * 重新计算并上传纹理/变异缓冲区（编辑地面纹理后调用）
+     */
+    updateTextureBuffers(): void {
+        if (!this.terrainReady) return;
+
+        const corners = this.w3e.corners;
+        const [columns, rows] = this.mapSize;
+        const instanceCount = (columns - 1) * (rows - 1);
+        const cornerTextures = new Uint8Array(instanceCount * 4);
+        const cornerVariations = new Uint8Array(instanceCount * 4);
+        let instance = 0;
+
+        for (let y = 0; y < rows; y++) {
+            for (let x = 0; x < columns; x++) {
+                if (y < rows - 1 && x < columns - 1) {
+                    if (!this.w3e.isCliff(x, y)) {
+                        const bottomLeft = corners[y][x];
+                        const bottomLeftTexture = this.w3e.cornerTexture(x, y, this.tilesets, this.cliffTilesets);
+                        const bottomRightTexture = this.w3e.cornerTexture(x + 1, y, this.tilesets, this.cliffTilesets);
+                        const topLeftTexture = this.w3e.cornerTexture(x, y + 1, this.tilesets, this.cliffTilesets);
+                        const topRightTexture = this.w3e.cornerTexture(x + 1, y + 1, this.tilesets, this.cliffTilesets);
+                        const textures = unique([bottomLeftTexture, bottomRightTexture, topLeftTexture, topRightTexture]).sort();
+                        let texture = textures[0];
+
+                        cornerTextures[instance * 4] = texture + 1;
+                        cornerVariations[instance * 4] = this.getVariation(texture, bottomLeft.groundVariation);
+
+                        textures.shift();
+
+                        for (let i = 0, l = textures.length; i < l; i++) {
+                            let bitset = 0;
+                            texture = textures[i];
+                            if (bottomRightTexture === texture) bitset |= 0b0001;
+                            if (bottomLeftTexture === texture) bitset |= 0b0010;
+                            if (topRightTexture === texture) bitset |= 0b0100;
+                            if (topLeftTexture === texture) bitset |= 0b1000;
+                            cornerTextures[instance * 4 + 1 + i] = texture + 1;
+                            cornerVariations[instance * 4 + 1 + i] = bitset;
+                        }
+                    }
+                    instance += 1;
+                }
+            }
+        }
+
+        const gl = this.viewer.gl;
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.textureBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, cornerTextures, gl.STATIC_DRAW);
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.variationBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, cornerVariations, gl.STATIC_DRAW);
+    }
+
+    /**
+     * 从已加载的纹理中提取缩略图 Data URL
+     */
+    /**
+     * 从已缓存的 BLP 原始数据解码缩略图 Data URL。
+     *
+     * 使用 window._blpRawCache（由 index.ts 的 fetch 覆写填充）获取原始 buffer，
+     * 再通过 window.blp2 解码为 ImageData，最后缩放到 size×size。
+     *
+     * 注意：blp2 库固定读取最小 mip 级别（mipLevels-1），通过临时将 header 中
+     * mipLevels 字节设为 1，强制其解码 mip 0（全分辨率）。
+     */
+    getTexturePreview(index: number, size: number = 64, source: 'ground' | 'cliff' = 'ground'): string | null {
+        const paths = source === 'cliff' ? this.cliffTexturePaths : this.tilesetTexturePaths;
+        if (index < 0 || index >= paths.length) return null;
+        const path = paths[index];
+        if (!path) return null;
+
+        const cache = (window as any)._blpRawCache as Map<string, ArrayBuffer> | undefined;
+        const normalizedPath = path.replace(/\//g, '\\').toLowerCase();
+        const rawBuf = cache?.get(normalizedPath) || cache?.get(path.toLowerCase()) || null;
+        if (!rawBuf) {
+            console.warn('[MapViewer] preview cache miss:', { source, index, path, normalizedPath, cacheSize: cache?.size || 0 });
+            return null;
+        }
+
+        let imageData: ImageData | undefined;
+        try {
+            const decode = (window as any).decode as ((buf: ArrayBuffer) => any) | undefined;
+            const getImageData = (window as any).getImageData as ((blp: any, mip: number) => ImageData | undefined) | undefined;
+
+            if (typeof decode === 'function' && typeof getImageData === 'function') {
+                const blp = decode(rawBuf);
+                imageData = getImageData(blp, 0);
+            } else {
+                // 回退：旧逻辑仅支持 BLP2
+                const blp2 = (window as any).blp2 as ((buf: ArrayBuffer) => ImageData | undefined) | undefined;
+                if (typeof blp2 !== 'function') return null;
+                const copy = rawBuf.slice(0);
+                new DataView(copy).setUint8(11, 1);
+                imageData = blp2(copy);
+            }
+        } catch (e) {
+            console.warn('[MapViewer] BLP preview decode failed:', path, e);
+            return null;
+        }
+        if (!imageData || !imageData.width || !imageData.height) return null;
+
+        const tmp = document.createElement('canvas');
+        tmp.width = imageData.width;
+        tmp.height = imageData.height;
+        const tmpCtx = tmp.getContext('2d');
+        if (!tmpCtx) return null;
+        tmpCtx.putImageData(imageData, 0, 0);
+
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return null;
+        ctx.drawImage(tmp, 0, 0, size, size);
+        return canvas.toDataURL();
     }
 }

@@ -69,9 +69,13 @@ export class SimpleOrbitCamera {
     this.canvas.addEventListener('selectstart', (e) => e.preventDefault());
 
     // Track mouse clicks.
+    // 只有按住 Ctrl 时才允许鼠标接管镜头控制，默认左键留给地形编辑。
     this.canvas.addEventListener('mousedown', (e) => {
-      e.preventDefault();
+      if (!e.ctrlKey) {
+        return;
+      }
 
+      e.preventDefault();
       this.mouse.buttons[e.button] = true;
     });
 
@@ -93,11 +97,11 @@ export class SimpleOrbitCamera {
       let dx = this.mouse.x - this.mouse.x2;
       let dy = this.mouse.y - this.mouse.y2;
 
-      if (this.mouse.buttons[0]) {
+      if (e.ctrlKey && this.mouse.buttons[0]) {
         this.rotate(dx, dy);
       }
 
-      if (this.mouse.buttons[2]) {
+      if (e.ctrlKey && this.mouse.buttons[2]) {
         this.move(-dx, dy);
       }
     });

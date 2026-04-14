@@ -197,6 +197,18 @@ export default class Message {
         return buf.map(v => Buffer.from(v).toString('utf-8'));
     }
 
+    /**
+     * 保存 W3E 地形文件
+     */
+    async saveW3E(data: ArrayBuffer) {
+        if (this.resource.fsPath.toLowerCase().endsWith('.w3e')) {
+            const buffer = Buffer.from(data);
+            await vscode.workspace.fs.writeFile(this.resource, buffer);
+            return { success: true, message: '地形已保存' };
+        }
+        return { success: false, message: '文件类型错误' };
+    }
+
     async onMessage(message: { type: string, requestId: number, data: any }) {
         if (!this[message.type] || typeof this[message.type] !== 'function') {
             throw new Error(`message.type ${message.type} method not found`);

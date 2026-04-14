@@ -10,12 +10,17 @@
 			"type": "extensionHost",
 			"request": "launch",
 			"args": [
-				"--extensionDevelopmentPath=${workspaceFolder}"
+				"--extensionDevelopmentPath=${workspaceFolder}",
+				"--disable-extensions",
+				"--locale=en-US",
+				"--user-data-dir=${workspaceFolder}/.vscode/.devhost-user-data",
+				"--extensions-dir=${workspaceFolder}/.vscode/.devhost-extensions"
 			],
 			"outFiles": [
 				"${workspaceFolder}/dist/**/*.js"
 			],
-			"preLaunchTask": "build: webpack compile"
+			"preLaunchTask": "build: webpack compile",
+			"internalConsoleOptions": "openOnSessionStart"
 		}
 	]
 }

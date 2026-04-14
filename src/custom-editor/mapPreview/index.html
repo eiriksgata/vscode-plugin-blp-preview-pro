@@ -1,5 +1,633 @@
-<div class="container" dropzone="copy">
-    <div class="inner">
+<div class="editor-container">
+    <!-- 主编辑区 -->
+    <div class="main-editor">
+        <!-- 顶部工具栏 -->
+        <div class="top-toolbar">
+            <div class="tool-group">
+                <button id="undoBtn" class="action-btn" title="撤销（Ctrl+Z）">↶ 撤销</button>
+                <button id="redoBtn" class="action-btn" title="重做（Ctrl+Shift+Z）">↷ 重做</button>
+                <button id="saveBtn" class="action-btn save-btn" title="保存（Ctrl+S）">💾 保存</button>
+            </div>
+            <div class="toolbar-hint">左键绘制 | Ctrl+左键旋转 | Ctrl+右键平移 | 滚轮缩放</div>
+        </div>
+        <!-- Canvas -->
         <canvas id="canvas" width="300" height="300"></canvas>
     </div>
+
+    <!-- 右侧面板 -->
+    <div class="side-panel">
+        <div class="menu-tabs">
+            <button class="menu-tab active" data-tab="terrain" title="地形纹理">🏔️</button>
+            <button class="menu-tab" data-tab="cliff" title="悬崖">⛰️</button>
+            <button class="menu-tab" data-tab="water" title="水面">💧</button>
+            <button class="menu-tab" data-tab="props" title="属性">⚙️</button>
+        </div>
+
+        <div class="menu-content">
+            <!-- ===== 地形 ===== -->
+            <div class="menu-pane active" id="terrain-pane">
+                <div class="pane-section">
+                    <div class="section-title">地面纹理</div>
+                    <div class="texture-grid" id="groundTextureGrid"></div>
+                </div>
+                <div class="pane-section">
+                    <label class="slider-label"><span>纹理变异</span><span class="val" id="groundVariationValue">0</span></label>
+                    <input type="range" id="groundVariation" min="0" max="15" value="0" class="slider">
+                </div>
+                <div class="pane-section">
+                    <label class="slider-label"><span>笔刷大小</span><span class="val" id="terrainBrushSizeValue">3</span></label>
+                    <input type="range" id="terrainBrushSize" min="1" max="10" value="3" class="slider">
+                </div>
+                <div class="pane-section">
+                    <label class="slider-label"><span>笔刷强度</span><span class="val" id="terrainBrushStrengthValue">1.0</span></label>
+                    <input type="range" id="terrainBrushStrength" min="0.1" max="2" step="0.1" value="1.0" class="slider">
+                </div>
+                <div class="info-box" id="terrainInfo">左键点击地形进行绘制</div>
+            </div>
+
+            <!-- ===== 悬崖 ===== -->
+            <div class="menu-pane" id="cliff-pane">
+                <div class="pane-section">
+                    <div class="section-title">悬崖纹理</div>
+                    <div class="texture-grid" id="cliffTextureGrid"></div>
+                </div>
+                <div class="pane-section">
+                    <label class="slider-label"><span>高度图层</span><span class="val" id="cliffLayerHeightValue">1</span></label>
+                    <input type="range" id="cliffLayerHeight" min="0" max="15" value="1" class="slider">
+                </div>
+                <div class="pane-section">
+                    <label class="slider-label"><span>笔刷大小</span><span class="val" id="cliffBrushSizeValue">2</span></label>
+                    <input type="range" id="cliffBrushSize" min="1" max="8" value="2" class="slider">
+                </div>
+                <div class="pane-section">
+                    <label class="slider-label"><span>笔刷强度</span><span class="val" id="cliffBrushStrengthValue">0.5</span></label>
+                    <input type="range" id="cliffBrushStrength" min="0.1" max="1" step="0.1" value="0.5" class="slider">
+                </div>
+                <div class="info-box" id="cliffInfo">左键点击地形进行绘制</div>
+            </div>
+
+            <!-- ===== 水面 ===== -->
+            <div class="menu-pane" id="water-pane">
+                <div class="pane-section">
+                    <label class="slider-label"><span>水面高度</span><span class="val" id="waterHeightValue">0.0</span></label>
+                    <input type="range" id="waterHeight" min="-10" max="10" step="0.1" value="0" class="slider">
+                </div>
+                <div class="pane-section">
+                    <label class="slider-label"><span>笔刷大小</span><span class="val" id="waterBrushSizeValue">4</span></label>
+                    <input type="range" id="waterBrushSize" min="1" max="10" value="4" class="slider">
+                </div>
+                <div class="pane-section">
+                    <label class="slider-label"><span>笔刷强度</span><span class="val" id="waterBrushStrengthValue">0.3</span></label>
+                    <input type="range" id="waterBrushStrength" min="0.1" max="1" step="0.1" value="0.3" class="slider">
+                </div>
+                <div class="button-group">
+                    <button id="toggleWater" class="toggle-btn">✚ 添加水面</button>
+                    <button id="removeWater" class="toggle-btn red">✕ 移除水面</button>
+                </div>
+                <div class="info-box" id="waterInfo">左键点击地形进行绘制</div>
+            </div>
+
+            <!-- ===== 属性 ===== -->
+            <div class="menu-pane" id="props-pane">
+                <div class="pane-section">
+                    <label class="check-label"><input type="checkbox" id="propBlight"> 🔴 瘟疫</label>
+                </div>
+                <div class="pane-section">
+                    <label class="check-label"><input type="checkbox" id="propBoundary"> 🟡 边界</label>
+                </div>
+                <div class="pane-section">
+                    <label class="check-label"><input type="checkbox" id="propRamp"> 🟢 斜坡</label>
+                </div>
+                <div class="pane-section">
+                    <label class="check-label"><input type="checkbox" id="propMapEdge"> 🔵 地图边界</label>
+                </div>
+                <div class="info-box" id="propsInfo">点击地形角落以编辑属性</div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* 整体布局 */
+html, body { width: 100%; height: 100%; overflow: hidden; }
+
+.editor-container {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    background: #1e1e1e;
+    color: #ccc;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 13px;
+}
+
+/* 左侧主编辑区：填满剩余空间 */
+.main-editor {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* 顶部工具栏 */
+.top-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 10px;
+    background: #252526;
+    border-bottom: 1px solid #3e3e42;
+    flex-shrink: 0;
+}
+.tool-group { display: flex; gap: 4px; }
+.toolbar-hint { color: #6a6a6a; font-size: 11px; margin-left: auto; white-space: nowrap; }
+
+.action-btn {
+    padding: 5px 12px;
+    background: #0e639c;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    font-size: 12px;
+    border-radius: 3px;
+    transition: background .15s;
+}
+.action-btn:hover:not(:disabled) { background: #1177bb; }
+.action-btn:disabled { opacity: .35; cursor: not-allowed; }
+.save-btn { background: #107c10; }
+.save-btn:hover:not(:disabled) { background: #138000; }
+
+/* Canvas 占满剩余空间 */
+#canvas {
+    flex: 1;
+    display: block;
+    width: 100%;
+    min-height: 0;
+    background: #111;
+}
+
+/* ========== 右侧面板 ========== */
+.side-panel {
+    width: 280px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    background: #252526;
+    border-left: 1px solid #3e3e42;
+    overflow: hidden;
+}
+
+/* 标签栏 */
+.menu-tabs {
+    display: flex;
+    background: #1e1e1e;
+    border-bottom: 1px solid #3e3e42;
+    flex-shrink: 0;
+}
+.menu-tab {
+    flex: 1;
+    padding: 10px 0;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: #777;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all .15s;
+    text-align: center;
+}
+.menu-tab:hover { color: #bbb; background: rgba(255,255,255,.04); }
+.menu-tab.active { color: #4ec9b0; border-bottom-color: #4ec9b0; }
+
+/* 内容区可滚动 */
+.menu-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: relative;
+}
+.menu-content::-webkit-scrollbar { width: 6px; }
+.menu-content::-webkit-scrollbar-track { background: transparent; }
+.menu-content::-webkit-scrollbar-thumb { background: #464647; border-radius: 3px; }
+.menu-content::-webkit-scrollbar-thumb:hover { background: #5a5a5a; }
+
+.menu-pane { display: none; padding: 12px; }
+.menu-pane.active { display: block; }
+
+/* 分区 */
+.pane-section {
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.pane-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+.section-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    margin-bottom: 8px;
+}
+
+/* ===== 纹理网格 ===== */
+.texture-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+}
+.tex-item {
+    position: relative;
+    aspect-ratio: 1;
+    border: 2px solid transparent;
+    border-radius: 4px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color .15s, transform .1s;
+    background: #333;
+}
+.tex-item:hover { border-color: #666; transform: scale(1.05); z-index: 1; }
+.tex-item.selected { border-color: #4ec9b0; box-shadow: 0 0 6px rgba(78,201,176,.4); }
+.tex-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    image-rendering: pixelated;
+}
+.tex-item .tex-idx {
+    position: absolute;
+    bottom: 1px;
+    right: 2px;
+    font-size: 9px;
+    color: #fff;
+    text-shadow: 0 0 3px #000, 0 0 3px #000;
+    pointer-events: none;
+}
+
+/* 滑块 */
+.slider-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+    font-size: 12px;
+    color: #aaa;
+}
+.slider-label .val { color: #4ec9b0; font-weight: 600; font-size: 12px; }
+
+.slider {
+    width: 100%;
+    height: 4px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: #3e3e42;
+    outline: none;
+    border-radius: 2px;
+    cursor: pointer;
+}
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px; height: 14px;
+    background: #4ec9b0;
+    border-radius: 50%;
+    border: 2px solid #252526;
+    cursor: pointer;
+}
+
+/* 按钮组 */
+.button-group { display: flex; gap: 6px; margin-bottom: 12px; }
+.toggle-btn {
+    flex: 1;
+    padding: 8px;
+    background: #0e639c;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    font-size: 12px;
+    border-radius: 3px;
+    transition: background .15s;
+}
+.toggle-btn:hover { background: #1177bb; }
+.toggle-btn.red { background: #a81e1e; }
+.toggle-btn.red:hover { background: #c62828; }
+
+/* 复选框 */
+.check-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 4px 0;
+}
+.check-label input[type="checkbox"] {
+    width: 15px; height: 15px;
+    accent-color: #4ec9b0;
+    cursor: pointer;
+}
+
+/* 信息框 */
+.info-box {
+    background: rgba(30,30,30,.6);
+    border: 1px solid rgba(78,201,176,.15);
+    border-radius: 4px;
+    padding: 10px;
+    font-size: 11px;
+    color: #999;
+    font-family: 'Cascadia Code', 'Fira Code', monospace;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+</style>
+
+<script>
+// 将 terrainEditor 注入全局作用域（供 HTML 脚本调用）
+window.terrainEditor = null;
+let currentEditMode = 'terrain';
+
+// 菜单标签切换
+document.querySelectorAll('.menu-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.menu-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.menu-pane').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        const tabName = tab.dataset.tab;
+        currentEditMode = tabName;
+        document.getElementById(`${tabName}-pane`).classList.add('active');
+        if (window.terrainEditor) {
+            window.terrainEditor.setEditMode(tabName);
+        }
+    });
+});
+
+// ===== 纹理网格：点击选择 =====
+const groundTextureGrid = document.getElementById('groundTextureGrid');
+const cliffTextureGrid = document.getElementById('cliffTextureGrid');
+
+// 填充纹理网格（由 index.ts 调用）
+window.populateTextureGrid = function(gridId, previews, onSelect) {
+    const grid = document.getElementById(gridId);
+    if (!grid) return;
+    grid.innerHTML = '';
+    previews.forEach((dataUrl, idx) => {
+        const item = document.createElement('div');
+        item.className = 'tex-item' + (idx === 0 ? ' selected' : '');
+        item.dataset.index = idx;
+        if (dataUrl) {
+            const img = document.createElement('img');
+            img.src = dataUrl;
+            item.appendChild(img);
+        }
+        const label = document.createElement('span');
+        label.className = 'tex-idx';
+        label.textContent = idx;
+        item.appendChild(label);
+        item.addEventListener('click', () => {
+            grid.querySelectorAll('.tex-item').forEach(el => el.classList.remove('selected'));
+            item.classList.add('selected');
+            if (onSelect) onSelect(idx);
+        });
+        grid.appendChild(item);
+    });
+};
+
+// ===== 地形菜单 =====
+const groundVariationSlider = document.getElementById('groundVariation');
+const terrainBrushSizeSlider = document.getElementById('terrainBrushSize');
+const terrainBrushStrengthSlider = document.getElementById('terrainBrushStrength');
+const terrainInfoBox = document.getElementById('terrainInfo');
+
+groundVariationSlider.addEventListener('input', (e) => {
+    document.getElementById('groundVariationValue').textContent = e.target.value;
+    if (window.terrainEditor) {
+        window.terrainEditor.setGroundVariation(parseInt(e.target.value));
+    }
+});
+
+terrainBrushSizeSlider.addEventListener('input', (e) => {
+    const size = parseInt(e.target.value);
+    document.getElementById('terrainBrushSizeValue').textContent = size;
+    if (window.terrainEditor) {
+        window.terrainEditor.setTerrainBrushSize(size);
+    }
+});
+
+terrainBrushStrengthSlider.addEventListener('input', (e) => {
+    const strength = parseFloat(e.target.value);
+    document.getElementById('terrainBrushStrengthValue').textContent = strength.toFixed(1);
+    if (window.terrainEditor) {
+        window.terrainEditor.setTerrainBrushStrength(strength);
+    }
+});
+
+// ===== 悬崖菜单 =====
+const cliffLayerHeightSlider = document.getElementById('cliffLayerHeight');
+const cliffBrushSizeSlider = document.getElementById('cliffBrushSize');
+const cliffBrushStrengthSlider = document.getElementById('cliffBrushStrength');
+const cliffInfoBox = document.getElementById('cliffInfo');
+
+cliffLayerHeightSlider.addEventListener('input', (e) => {
+    document.getElementById('cliffLayerHeightValue').textContent = e.target.value;
+    if (window.terrainEditor) {
+        window.terrainEditor.setCliffLayerHeight(parseInt(e.target.value));
+    }
+});
+
+cliffBrushSizeSlider.addEventListener('input', (e) => {
+    const size = parseInt(e.target.value);
+    document.getElementById('cliffBrushSizeValue').textContent = size;
+    if (window.terrainEditor) {
+        window.terrainEditor.setCliffBrushSize(size);
+    }
+});
+
+cliffBrushStrengthSlider.addEventListener('input', (e) => {
+    const strength = parseFloat(e.target.value);
+    document.getElementById('cliffBrushStrengthValue').textContent = strength.toFixed(1);
+    if (window.terrainEditor) {
+        window.terrainEditor.setCliffBrushStrength(strength);
+    }
+});
+
+// ===== 水面菜单 =====
+const waterHeightSlider = document.getElementById('waterHeight');
+const waterBrushSizeSlider = document.getElementById('waterBrushSize');
+const waterBrushStrengthSlider = document.getElementById('waterBrushStrength');
+const toggleWaterBtn = document.getElementById('toggleWater');
+const removeWaterBtn = document.getElementById('removeWater');
+const waterInfoBox = document.getElementById('waterInfo');
+
+waterHeightSlider.addEventListener('input', (e) => {
+    const height = parseFloat(e.target.value);
+    document.getElementById('waterHeightValue').textContent = height.toFixed(1);
+    if (window.terrainEditor) {
+        window.terrainEditor.setWaterHeight(height);
+    }
+});
+
+waterBrushSizeSlider.addEventListener('input', (e) => {
+    const size = parseInt(e.target.value);
+    document.getElementById('waterBrushSizeValue').textContent = size;
+    if (window.terrainEditor) {
+        window.terrainEditor.setWaterBrushSize(size);
+    }
+});
+
+waterBrushStrengthSlider.addEventListener('input', (e) => {
+    const strength = parseFloat(e.target.value);
+    document.getElementById('waterBrushStrengthValue').textContent = strength.toFixed(1);
+    if (window.terrainEditor) {
+        window.terrainEditor.setWaterBrushStrength(strength);
+    }
+});
+
+toggleWaterBtn.addEventListener('click', () => {
+    if (window.terrainEditor) {
+        window.terrainEditor.addWaterAtCursor();
+    }
+});
+
+removeWaterBtn.addEventListener('click', () => {
+    if (window.terrainEditor) {
+        window.terrainEditor.removeWaterAtCursor();
+    }
+});
+
+// ===== 属性菜单 =====
+const propBlightCheckbox = document.getElementById('propBlight');
+const propBoundaryCheckbox = document.getElementById('propBoundary');
+const propRampCheckbox = document.getElementById('propRamp');
+const propMapEdgeCheckbox = document.getElementById('propMapEdge');
+const propsInfoBox = document.getElementById('propsInfo');
+
+propBlightCheckbox.addEventListener('change', (e) => {
+    if (window.terrainEditor) {
+        window.terrainEditor.setBlightAtCursor(e.target.checked);
+    }
+});
+
+propBoundaryCheckbox.addEventListener('change', (e) => {
+    if (window.terrainEditor) {
+        window.terrainEditor.setBoundaryAtCursor(e.target.checked);
+    }
+});
+
+propRampCheckbox.addEventListener('change', (e) => {
+    if (window.terrainEditor) {
+        window.terrainEditor.setRampAtCursor(e.target.checked);
+    }
+});
+
+propMapEdgeCheckbox.addEventListener('change', (e) => {
+    if (window.terrainEditor) {
+        window.terrainEditor.setMapEdgeAtCursor(e.target.checked);
+    }
+});
+
+// ===== 全局按钮控制 =====
+document.getElementById('undoBtn').addEventListener('click', () => {
+    if (window.terrainEditor && window.terrainEditor.canUndo()) {
+        window.terrainEditor.undo();
+    }
+});
+
+document.getElementById('redoBtn').addEventListener('click', () => {
+    if (window.terrainEditor && window.terrainEditor.canRedo()) {
+        window.terrainEditor.redo();
+    }
+});
+
+document.getElementById('saveBtn').addEventListener('click', async () => {
+    if (window.terrainEditor && window.terrainEditor.isDirtied()) {
+        const success = await window.terrainEditor.save();
+        if (success) {
+            alert('地形已保存');
+        } else {
+            alert('保存失败');
+        }
+    }
+});
+
+// ===== 显示/更新角落信息 =====
+window.updateCornerInfo = function(corner, mode) {
+    if (!corner) {
+        terrainInfoBox.textContent = '左键拖动直接绘制地形\n按住 Ctrl + 左键旋转镜头\n按住 Ctrl + 右键平移镜头';
+        return;
+    }
+    const info = [
+        `📍 坐标: [${corner.column}, ${corner.row}]`,
+        `高度: ${(corner.height).toFixed(2)} 格`,
+        `地面纹理: ${corner.groundTexture}`,
+        `地面变异: ${corner.groundVariation}`,
+        ``,
+        `🔧 当前模式: ${mode}`,
+        `📏 笔刷: ${terrainBrushSizeSlider.value} × ${terrainBrushStrengthSlider.value}`
+    ].join('\n');
+    terrainInfoBox.textContent = info;
+};
+
+window.updateCliffInfo = function(corner, mode) {
+    if (!corner) {
+        cliffInfoBox.textContent = '等待鼠标移动...';
+        return;
+    }
+    const info = [
+        `📍 坐标: [${corner.column}, ${corner.row}]`,
+        `悬崖高度图层: ${corner.layerHeight}`,
+        `悬崖纹理: ${corner.cliffTexture}`,
+        `悬崖变异: ${corner.cliffVariation}`,
+        ``,
+        `🔧 当前模式: ${mode}`,
+        `📏 笔刷: ${cliffBrushSizeSlider.value} × ${cliffBrushStrengthSlider.value}`
+    ].join('\n');
+    cliffInfoBox.textContent = info;
+};
+
+window.updateWaterInfo = function(corner) {
+    if (!corner) {
+        waterInfoBox.textContent = '等待鼠标移动...';
+        return;
+    }
+    const hasWater = (corner.flags & 0x40) !== 0;
+    const info = [
+        `📍 坐标: [${corner.column}, ${corner.row}]`,
+        `水面高度: ${corner.waterHeight ? corner.waterHeight.toFixed(2) : '0.00'} 格`,
+        `地面高度: ${corner.height.toFixed(2)} 格`,
+        `水面状态: ${hasWater ? '✓ 有水' : '✗ 无水'}`,
+        ``,
+        `📏 笔刷: ${waterBrushSizeSlider.value} × ${waterBrushStrengthSlider.value}`
+    ].join('\n');
+    waterInfoBox.textContent = info;
+};
+
+window.updatePropsInfo = function(corner) {
+    if (!corner) {
+        propsInfoBox.textContent = '点击地形角落以编辑属性';
+        return;
+    }
+    const flags = corner.flags || 0;
+    const hasBlight = (flags & 0x20) !== 0;
+    const hasBoundary = (flags & 0x80) !== 0;
+    const hasRamp = (flags & 0x10) !== 0;
+    const hasEdge = (flags & 0x02) !== 0;
+    propBlightCheckbox.checked = hasBlight;
+    propBoundaryCheckbox.checked = hasBoundary;
+    propRampCheckbox.checked = hasRamp;
+    propMapEdgeCheckbox.checked = hasEdge;
+    const info = [
+        `📍 坐标: [${corner.column}, ${corner.row}]`,
+        ``,
+        `🏳️ 瘟疫: ${hasBlight ? '✓ 是' : '✗ 否'}`,
+        `🏳️ 边界: ${hasBoundary ? '✓ 是' : '✗ 否'}`,
+        `🏳️ 斜坡: ${hasRamp ? '✓ 是' : '✗ 否'}`,
+        `🏳️ 地图边界: ${hasEdge ? '✓ 是' : '✗ 否'}`
+    ].join('\n');
+    propsInfoBox.textContent = info;
+};
+</script>

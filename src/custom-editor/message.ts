@@ -38,6 +38,10 @@ export default class Message {
         return await this._trans('loadResource', blpPath);
     }
 
+    async saveW3E(data: ArrayBuffer): Promise<{ success: boolean; message?: string }> {
+        return await this._trans('saveW3E', data);
+    }
+
     _trans(type: string, data: any = null, timeout: number = -1): any {
         const requestId = parseInt((Math.random() + '').slice(2), 10);
         const request: Request = {

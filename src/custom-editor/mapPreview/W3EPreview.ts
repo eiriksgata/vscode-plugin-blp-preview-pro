@@ -11,6 +11,9 @@ export default class W3EPreview extends BasePreview {
     getJSSource(): string[] {
         return [
             '/media/message.js',
+            '/media/lib/jpgDecoder.js',
+            '/media/lib/blp2.js',
+            '/media/lib/binReader.js',
             '/media/lib/viewer.min2.js',
             '/media/mapPreview.js',
         ];

@@ -128,6 +128,21 @@ export default class BasePreview extends Disposable {
 
     }
 
+    /**
+     * 为模板中的内联 script/style 自动注入 nonce，避免被 Webview CSP 拦截。
+     */
+    private applyNonceToInlineTags(template: string): string {
+        const nonce = this.nonce;
+        const withScriptNonce = template.replace(
+            /<script(?![^>]*\bnonce=)([^>]*)>/gi,
+            `<script nonce="${nonce}"$1>`,
+        );
+        return withScriptNonce.replace(
+            /<style(?![^>]*\bnonce=)([^>]*)>/gi,
+            `<style nonce="${nonce}"$1>`,
+        );
+    }
+
     update() {
         if (this._previewState === ViewState.disposed) {
             return;
@@ -151,7 +166,7 @@ export default class BasePreview extends Disposable {
         // 步骤2: 获取预览类型定义的 CSS 和 JS 源
         const cssSources = this.getCssSource();
         const jsSources = this.getJSSource();
-        const htmlTemplate = this.getHTMLTempalte();
+        const htmlTemplate = this.applyNonceToInlineTags(this.getHTMLTempalte());
 
         // 步骤3: 创建 HTML 构建器
         const builder = new WebviewHtmlBuilder({
