@@ -40,8 +40,11 @@ export default class BlpPreview extends BasePreview {
         return htmlTemplate;
     }
 
-    onMessage(message: { type?: string; value?: unknown }): void {
-        super.onMessage(message);
+    onMessage(message: { type?: string; value?: unknown; requestId?: number | string }): void {
+        // Only RPC-style messages are handled by BasePreview/Message.
+        if (typeof message.requestId !== 'undefined') {
+            super.onMessage(message);
+        }
         this.eventMiddleware.handleMessage(message, {
             onSizeChange: (event: BlpPreviewEvents.SizeEvent) => {
                 this.imageSize = event.value;

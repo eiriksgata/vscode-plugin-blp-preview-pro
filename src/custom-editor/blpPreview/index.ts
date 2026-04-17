@@ -48,7 +48,8 @@ function getSettings(): { isMac: boolean } {
         }
     }
 
-    throw new Error(`Could not load settings`);
+    // Fallback for templates that do not inject runtime settings.
+    return { isMac: /Mac|iPhone|iPad|iPod/.test(navigator.platform) };
 }
 
 /**

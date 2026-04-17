@@ -400,22 +400,26 @@ export default class MapViewer {
 
         const cliffShader = this.cliffShader;
 
-        const cliffPromises = Object.entries(cliffs).map(async (cliff) => {
+        const cliffEntries = Object.entries(cliffs);
+        console.info('[MapViewer] cliff models to load:', cliffEntries.length);
+
+        const cliffPromises = cliffEntries.map(async (cliff) => {
             const path = cliff[0];
             const { locations, textures } = cliff[1];
             const buffer = await this.loadBaseFile(path, 'arrayBuffer');
 
             if (buffer) {
+                console.info('[MapViewer] cliff model loaded:', path, 'bytes=', (buffer as ArrayBuffer).byteLength);
                 return new TerrainModel(this, buffer, locations, textures, cliffShader);
             }
 
-            return;
-        }).filter(x => x);
+            console.warn('[MapViewer] cliff model NOT found:', path);
+            return null;
+        });
 
-        // Sometimes TS isn't the brightest.
-        const cliffPromisesForReal = <Promise<TerrainModel>[]>cliffPromises;
-
-        this.cliffModels = await Promise.all(cliffPromisesForReal);
+        const cliffResults = await Promise.all(cliffPromises);
+        this.cliffModels = cliffResults.filter((x): x is TerrainModel => x !== null);
+        console.info('[MapViewer] cliff models ready:', this.cliffModels.length, '/', cliffEntries.length);
         this.cliffsReady = true;
     }
 
@@ -617,6 +621,10 @@ export default class MapViewer {
 
             gl.enable(gl.BLEND);
             gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+            gl.disable(gl.CULL_FACE);
+            gl.enable(gl.DEPTH_TEST);
+            gl.depthFunc(gl.LEQUAL);
+            gl.depthMask(true);
 
             webgl.useShader(shader);
 
@@ -694,6 +702,10 @@ export default class MapViewer {
             const uniforms = shader.uniforms;
 
             gl.disable(gl.BLEND);
+            gl.disable(gl.CULL_FACE);
+            gl.enable(gl.DEPTH_TEST);
+            gl.depthFunc(gl.LEQUAL);
+            gl.depthMask(true);
 
             shader.use();
 
@@ -707,12 +719,19 @@ export default class MapViewer {
             gl.activeTexture(gl.TEXTURE0);
             gl.bindTexture(gl.TEXTURE_2D, this.cliffHeightMap);
 
-            gl.activeTexture(gl.TEXTURE1);
-            gl.bindTexture(gl.TEXTURE_2D, this.cliffTextures[0].webglResource);
+            const ct0 = this.cliffTextures[0];
+            const ct1 = this.cliffTextures[1];
 
-            if (this.cliffTextures.length > 1) {
+            if (!ct0) {
+                return;
+            }
+
+            gl.activeTexture(gl.TEXTURE1);
+            gl.bindTexture(gl.TEXTURE_2D, ct0.webglResource);
+
+            if (ct1) {
                 gl.activeTexture(gl.TEXTURE2);
-                gl.bindTexture(gl.TEXTURE_2D, this.cliffTextures[1].webglResource);
+                gl.bindTexture(gl.TEXTURE_2D, ct1.webglResource);
             }
 
             // Set instanced attributes.
